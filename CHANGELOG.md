@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 (2026-11-07)
+
+- The Marketplace name is now "PPTX Viewer & PowerPoint Viewer", so a search for PowerPoint viewer finds it. The extension ID, settings and commands stay the same.
+
 ## 0.2.0 (2026-11-06)
 
 - Zoom. The toolbar has `-` and `+` buttons and a zoom list with Fit slide, Fit width and sizes from 50% to 400%. `Ctrl` or `Cmd` with the mouse wheel zooms around the mouse, and so does a trackpad pinch. `+`, `-` and `0` work in the viewer, and `Ctrl+=` and `Ctrl+-` (`Cmd` on macOS) too. A zoomed slide scrolls.
