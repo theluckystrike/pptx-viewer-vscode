@@ -2,7 +2,7 @@
   "name": "pptx-slide-viewer",
   "displayName": "PPTX Viewer for PowerPoint Slides",
   "description": "PPTX viewer for PowerPoint decks (.pptx, .ppsx, .potx) in VS Code with slides, thumbnails, speaker notes, search and copy as Markdown, all offline.",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -103,6 +103,38 @@
         "category": "PPTX"
       },
       {
+        "command": "pptxViewer.zoomIn",
+        "title": "Zoom In",
+        "category": "PPTX",
+        "icon": "$(zoom-in)"
+      },
+      {
+        "command": "pptxViewer.zoomOut",
+        "title": "Zoom Out",
+        "category": "PPTX",
+        "icon": "$(zoom-out)"
+      },
+      {
+        "command": "pptxViewer.zoomFit",
+        "title": "Zoom to Fit Slide",
+        "category": "PPTX"
+      },
+      {
+        "command": "pptxViewer.zoomWidth",
+        "title": "Zoom to Fit Width",
+        "category": "PPTX"
+      },
+      {
+        "command": "pptxViewer.zoomActual",
+        "title": "Zoom to 100%",
+        "category": "PPTX"
+      },
+      {
+        "command": "pptxViewer.toggleScrollView",
+        "title": "Toggle Scroll View (All Slides in One Column)",
+        "category": "PPTX"
+      },
+      {
         "command": "pptxViewer.openWith",
         "title": "Open with PPTX Slide Viewer",
         "category": "PPTX"
@@ -149,6 +181,30 @@
         {
           "command": "pptxViewer.toggleNotes",
           "when": "activeCustomEditorId == pptxViewer.preview"
+        },
+        {
+          "command": "pptxViewer.zoomIn",
+          "when": "activeCustomEditorId == pptxViewer.preview"
+        },
+        {
+          "command": "pptxViewer.zoomOut",
+          "when": "activeCustomEditorId == pptxViewer.preview"
+        },
+        {
+          "command": "pptxViewer.zoomFit",
+          "when": "activeCustomEditorId == pptxViewer.preview"
+        },
+        {
+          "command": "pptxViewer.zoomWidth",
+          "when": "activeCustomEditorId == pptxViewer.preview"
+        },
+        {
+          "command": "pptxViewer.zoomActual",
+          "when": "activeCustomEditorId == pptxViewer.preview"
+        },
+        {
+          "command": "pptxViewer.toggleScrollView",
+          "when": "activeCustomEditorId == pptxViewer.preview"
         }
       ]
     },
@@ -157,6 +213,24 @@
         "command": "pptxViewer.find",
         "key": "ctrl+f",
         "mac": "cmd+f",
+        "when": "activeCustomEditorId == pptxViewer.preview && !sideBarFocus && !panelFocus && !inQuickOpen"
+      },
+      {
+        "command": "pptxViewer.zoomIn",
+        "key": "ctrl+=",
+        "mac": "cmd+=",
+        "when": "activeCustomEditorId == pptxViewer.preview && !sideBarFocus && !panelFocus && !inQuickOpen"
+      },
+      {
+        "command": "pptxViewer.zoomIn",
+        "key": "ctrl+shift+=",
+        "mac": "cmd+shift+=",
+        "when": "activeCustomEditorId == pptxViewer.preview && !sideBarFocus && !panelFocus && !inQuickOpen"
+      },
+      {
+        "command": "pptxViewer.zoomOut",
+        "key": "ctrl+-",
+        "mac": "cmd+-",
         "when": "activeCustomEditorId == pptxViewer.preview && !sideBarFocus && !panelFocus && !inQuickOpen"
       }
     ],
@@ -178,6 +252,32 @@
           "type": "boolean",
           "default": true,
           "description": "Draw the slides. Turn off to show only the text outline and notes, which is faster for very large decks."
+        },
+        "pptxViewer.defaultView": {
+          "type": "string",
+          "enum": [
+            "slide",
+            "scroll"
+          ],
+          "enumDescriptions": [
+            "One slide at a time, with the speaker notes under it.",
+            "All slides in one column that you scroll, like a document."
+          ],
+          "default": "slide",
+          "description": "How a deck opens the first time. The Scroll button switches, and each file keeps its last choice."
+        },
+        "pptxViewer.defaultZoom": {
+          "type": "string",
+          "enum": [
+            "fit",
+            "width"
+          ],
+          "enumDescriptions": [
+            "The whole slide fits in the editor.",
+            "The slide is as wide as the editor."
+          ],
+          "default": "fit",
+          "description": "Zoom a deck opens with the first time. Each file keeps its last zoom."
         },
         "pptxViewer.askForRating": {
           "type": "boolean",

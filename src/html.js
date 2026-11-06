@@ -51,6 +51,25 @@ ${footer ? `<style>${FOOTER_CSS}</style>` : ''}
   <input id="slideInput" type="text" inputmode="numeric" aria-label="Slide number" value="1"><span id="slideCount">/ 0</span>
   <button id="nextBtn" title="Next slide (Right arrow)" aria-label="Next slide">&#8250;</button>
   <span class="sep"></span>
+  <span id="zoomGroup" class="group">
+    <button id="zoomOutBtn" title="Zoom out (-)" aria-label="Zoom out">&#8722;</button>
+    <select id="zoomSelect" title="Zoom (Ctrl or Cmd + mouse wheel also zooms)" aria-label="Zoom">
+      <option value="fit">Fit slide</option>
+      <option value="width">Fit width</option>
+      <option value="0.5">50%</option>
+      <option value="0.75">75%</option>
+      <option value="1">100%</option>
+      <option value="1.25">125%</option>
+      <option value="1.5">150%</option>
+      <option value="2">200%</option>
+      <option value="3">300%</option>
+      <option value="4">400%</option>
+      <option value="custom" hidden></option>
+    </select>
+    <button id="zoomInBtn" title="Zoom in (+)" aria-label="Zoom in">+</button>
+  </span>
+  <button id="scrollBtn" title="Scroll view: all slides in one column" aria-pressed="false">Scroll</button>
+  <span class="sep"></span>
   <input id="searchInput" type="search" placeholder="Search slides and notes" aria-label="Search slides and notes">
   <span id="searchCount"></span>
   <span class="grow"></span>

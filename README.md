@@ -8,7 +8,7 @@ For developers who get slide decks in a repo or a pull request, PPTX Viewer open
 
 *A real VS Code 1.142 window running this extension on [`test/fixtures/quarterly-review.pptx`](test/fixtures/quarterly-review.pptx), made by [`scripts/make-samples.py`](scripts/make-samples.py).*
 
-- See each slide with thumbnails, and its speaker notes right under it.
+- See each slide with thumbnails and its speaker notes. Zoom in on small print, or scroll through the whole deck like a document.
 - Search titles, bullets, table cells and notes across the whole deck, then jump to the slide.
 - Copy one slide or the whole deck as clean Markdown for a README, an issue or a chat with an AI assistant.
 
@@ -31,6 +31,14 @@ Type in the search box. The Outline tab lists every slide where the word appears
 
 Without a search, the Outline tab shows each slide title with its first lines of text, which is a quick way to skim a long deck.
 
+## Zoom and scroll view
+
+Use the `-` and `+` buttons or the zoom list in the toolbar. The list has Fit slide, Fit width and fixed sizes from 50% to 400%, and it shows the real percent. `Ctrl` or `Cmd` with the mouse wheel zooms around the mouse, and so does a trackpad pinch. A slide larger than the editor scrolls, so you can read a small table or chart label.
+
+"Scroll" puts every slide in one column, like a document. The slide in view becomes the current one, so the thumbnails, the slide number and the speaker notes follow you as you scroll. Slides are drawn as they come near the view, so a long deck stays fast.
+
+Each file keeps its last view and zoom in the workspace. The settings `pptxViewer.defaultView` and `pptxViewer.defaultZoom` choose how a deck opens the first time.
+
 ## Copy as Markdown
 
 "Copy as Markdown" puts the current slide on the clipboard. The title becomes a `##` heading, bullets keep their indent levels, tables become Markdown tables, and the speaker notes become a quote. "Copy all" does the same for every slide. Text that looks like HTML is escaped, so it pastes as text.
@@ -51,6 +59,10 @@ SmartArt, video, audio, ink and embedded objects are not drawn. A slide that has
 | `Home`, `End` | First or last slide |
 | `Ctrl+F` / `Cmd+F` | Search slides and notes |
 | `Enter`, `Shift+Enter` in the search box | Next or previous matching slide |
+| `+`, `-` | Zoom in or out |
+| `Ctrl+=`, `Ctrl+-` / `Cmd+=`, `Cmd+-` | Zoom in or out |
+| `Ctrl` / `Cmd` + mouse wheel, trackpad pinch | Zoom around the mouse |
+| `0` | Fit the slide in the editor |
 
 ## Settings
 
@@ -59,6 +71,8 @@ SmartArt, video, audio, ink and embedded objects are not drawn. A slide that has
 | `pptxViewer.maxFileSizeMB` | `150` | Ask before opening larger decks |
 | `pptxViewer.showNotes` | `true` | Show speaker notes under the slide |
 | `pptxViewer.renderSlides` | `true` | Draw the slides. Set to `false` to see only the outline, notes and search |
+| `pptxViewer.defaultView` | `slide` | How a deck opens the first time. `slide` shows one slide at a time and `scroll` puts all slides in one column |
+| `pptxViewer.defaultZoom` | `fit` | Zoom a deck opens with the first time, `fit` or `width` |
 | `pptxViewer.askForRating` | `true` | Ask one time for a Marketplace rating, after 5 files and 2 days. Turn it off with `false` |
 
 ## Large decks
@@ -75,6 +89,7 @@ Everything runs on your machine. The extension makes no network calls and has no
 - Old binary `.ppt` files (PowerPoint 97 to 2003) are not supported. Save them as `.pptx` first.
 - Fonts that are not installed on your machine are replaced, so line breaks can differ from PowerPoint.
 - Table styles from the theme are not always drawn. The table text is always correct.
+- Zoom changes the drawn slides. The text view, shown while slides are drawn or when drawing is off, keeps its normal size.
 - If another PowerPoint extension is installed, VS Code may ask which one to use. Right-click the file and pick "Open With..." to switch.
 
 ## Credits

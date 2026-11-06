@@ -2,6 +2,15 @@
 // Messages from the webview are untrusted. Accept only known shapes with checked values.
 
 const MAX_SLIDE = 100000;
+const VIEWS = new Set(['slide', 'scroll']);
+const ZOOM_MIN = 0.1;
+const ZOOM_MAX = 4;
+
+/** 'fit', 'width' or a scale from 0.1 to 4 (1 = 100 %). Anything else is null. */
+function zoomValue(v) {
+  if (v === 'fit' || v === 'width') return v;
+  return typeof v === 'number' && Number.isFinite(v) && v >= ZOOM_MIN && v <= ZOOM_MAX ? Math.round(v * 1000) / 1000 : null;
+}
 
 function int(v, lo, hi) {
   return Number.isInteger(v) && v >= lo && v <= hi ? v : null;
@@ -27,6 +36,11 @@ function parseWebviewMessage(raw) {
       const ms = int(raw.ms, 0, 3600000);
       return slides === null ? null : { type: raw.type, slides, ms: ms || 0 };
     }
+    case 'viewPrefs': {
+      const zoom = zoomValue(raw.zoom);
+      if (!VIEWS.has(raw.view) || zoom === null) return null;
+      return { type: raw.type, view: raw.view, zoom };
+    }
     case 'error':
       return { type: 'error', message: typeof raw.message === 'string' ? raw.message.slice(0, 500) : 'Unknown error' };
     default:
@@ -40,7 +54,9 @@ function readConfig(get) {
     maxFileSizeBytes: (Number.isFinite(mb) && mb > 0 ? mb : 150) * 1024 * 1024,
     showNotes: get('showNotes', true) !== false,
     renderSlides: get('renderSlides', true) !== false,
+    defaultView: get('defaultView', 'slide') === 'scroll' ? 'scroll' : 'slide',
+    defaultZoom: get('defaultZoom', 'fit') === 'width' ? 'width' : 'fit',
   };
 }
 
-module.exports = { parseWebviewMessage, readConfig };
+module.exports = { parseWebviewMessage, readConfig, zoomValue };

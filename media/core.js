@@ -116,5 +116,63 @@
     return n + ' B';
   }
 
-  return { splitHighlight, countMatches, searchDeck, noticeMessage, fitScale, clampSlide, formatBytes, slideBodyLines, snippet };
+  // ---- zoom ----
+  // A zoom is 'fit' (whole slide in the view), 'width' (slide as wide as the view) or a number,
+  // the scale against the slide's own size in pixels (1 = 100 %).
+  const ZOOM_MIN = 0.1;
+  const ZOOM_MAX = 4;
+  const ZOOM_STEPS = [0.1, 0.25, 0.33, 0.5, 0.67, 0.75, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4];
+
+  function normalizeZoom(z) {
+    if (z === 'fit' || z === 'width') return z;
+    const n = Number(z);
+    if (!Number.isFinite(n) || n <= 0) return 'fit';
+    return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(n * 1000) / 1000));
+  }
+
+  /** Scale for a zoom in a box of boxW x boxH, for a slide of w x h pixels. */
+  function zoomScale(zoom, boxW, boxH, w, h) {
+    zoom = normalizeZoom(zoom);
+    if (zoom === 'fit') return fitScale(boxW, boxH, w, h);
+    if (zoom === 'width') return boxW > 0 && w > 0 ? boxW / w : 1;
+    return zoom;
+  }
+
+  /** Next preset step from the current scale. dir is +1 (in) or -1 (out). */
+  function stepZoom(scale, dir) {
+    const s = Number(scale) > 0 ? Number(scale) : 1;
+    if (dir > 0) return ZOOM_STEPS.find((z) => z > s + 0.001) || ZOOM_MAX;
+    for (let i = ZOOM_STEPS.length - 1; i >= 0; i--) if (ZOOM_STEPS[i] < s - 0.001) return ZOOM_STEPS[i];
+    return ZOOM_MIN;
+  }
+
+  /** Scale after a Ctrl/Cmd + wheel (or pinch) event with vertical delta dy. */
+  function wheelZoom(scale, dy) {
+    const s = Number(scale) > 0 ? Number(scale) : 1;
+    const d = Math.max(-100, Math.min(100, Number(dy) || 0));
+    return normalizeZoom(s * Math.exp(-d / 300));
+  }
+
+  function zoomLabel(zoom, scale) {
+    const pct = Math.round(scale * 100) + '%';
+    zoom = normalizeZoom(zoom);
+    if (zoom === 'fit') return 'Fit (' + pct + ')';
+    if (zoom === 'width') return 'Width (' + pct + ')';
+    return pct;
+  }
+
+  // ---- scroll view ----
+  /** The slide (1-based) that holds the line 40 % down the view. tops are each slide's top offset. */
+  function slideAtScroll(tops, scrollTop, viewH) {
+    if (!tops || !tops.length) return 1;
+    const line = scrollTop + Math.max(0, viewH) * 0.4;
+    let n = 1;
+    for (let i = 0; i < tops.length; i++) { if (tops[i] <= line) n = i + 1; else break; }
+    return n;
+  }
+
+  function normalizeView(v) { return v === 'scroll' ? 'scroll' : 'slide'; }
+
+  return { splitHighlight, countMatches, searchDeck, noticeMessage, fitScale, clampSlide, formatBytes, slideBodyLines, snippet,
+    normalizeZoom, zoomScale, stepZoom, wheelZoom, zoomLabel, slideAtScroll, normalizeView, ZOOM_MIN, ZOOM_MAX };
 });

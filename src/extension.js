@@ -11,6 +11,9 @@ let rating = { success() {} };
 
 const VIEW_TYPE = 'pptxViewer.preview';
 const CONFIG = 'pptxViewer';
+const PREFS_KEY = 'pptxViewer.viewPrefs';
+const PREFS_MAX = 200;
+const WEBVIEW_COMMANDS = ['find', 'toggleNotes', 'zoomIn', 'zoomOut', 'zoomFit', 'zoomWidth', 'zoomActual', 'toggleScrollView'];
 
 // Node Buffers are serialised to JSON by postMessage; a plain Uint8Array is sent as bytes.
 function toPlainBytes(data) {
@@ -32,6 +35,27 @@ class PptxEditorProvider {
   }
 
   openCustomDocument(uri) { return new DeckDocument(uri); }
+
+  // View and zoom per file, kept in workspaceState for the newest PREFS_MAX files.
+  getPrefs(uri) {
+    const store = this.context.workspaceState;
+    const all = (store && store.get(PREFS_KEY)) || {};
+    const p = all[uri.toString()];
+    return p && typeof p === 'object' ? { view: p.view, zoom: p.zoom } : null;
+  }
+
+  async savePrefs(uri, view, zoom) {
+    const store = this.context.workspaceState;
+    if (!store) return;
+    const all = Object.assign({}, store.get(PREFS_KEY) || {});
+    all[uri.toString()] = { view, zoom, t: Date.now() };
+    const keys = Object.keys(all);
+    if (keys.length > PREFS_MAX) {
+      keys.sort((a, b) => (all[a].t || 0) - (all[b].t || 0));
+      for (const k of keys.slice(0, keys.length - PREFS_MAX)) delete all[k];
+    }
+    await store.update(PREFS_KEY, all);
+  }
 
   config() {
     const c = vscode.workspace.getConfiguration(CONFIG);
@@ -78,7 +102,7 @@ class PptxEditorProvider {
       if (!m) return;
       if (m.type === 'ready') {
         entry.ready = true;
-        send({ type: 'init', config: this.config(), fileName });
+        send({ type: 'init', config: this.config(), fileName, prefs: this.getPrefs(document.uri) });
         load();
       } else if (m.type === 'loadAnyway') {
         entry.forceLoad = true;
@@ -89,6 +113,8 @@ class PptxEditorProvider {
         await this.copySlide(entry, m.slide);
       } else if (m.type === 'copyDeckMarkdown') {
         await this.copyDeck(entry);
+      } else if (m.type === 'viewPrefs') {
+        await this.savePrefs(document.uri, m.view, m.zoom);
       } else if (m.type === 'rendered') {
         entry.rendered = m;
       } else if (m.type === 'error') {
@@ -145,8 +171,7 @@ function activate(context) {
     }),
     vscode.commands.registerCommand('pptxViewer.copySlideMarkdown', () => provider.copySlide(provider.active)),
     vscode.commands.registerCommand('pptxViewer.copyDeckMarkdown', () => provider.copyDeck(provider.active)),
-    vscode.commands.registerCommand('pptxViewer.find', () => provider.sendCommand('find')),
-    vscode.commands.registerCommand('pptxViewer.toggleNotes', () => provider.sendCommand('toggleNotes')),
+    ...WEBVIEW_COMMANDS.map((name) => vscode.commands.registerCommand('pptxViewer.' + name, () => provider.sendCommand(name))),
     vscode.commands.registerCommand('pptxViewer.openWith', async (uri) => {
       const target = uri instanceof vscode.Uri ? uri
         : ((await vscode.window.showOpenDialog({ filters: { PowerPoint: ['pptx', 'ppsx', 'potx', 'pptm'] }, canSelectMany: false })) || [])[0];
@@ -158,4 +183,4 @@ function activate(context) {
 
 function deactivate() {}
 
-module.exports = { activate, deactivate, PptxEditorProvider, VIEW_TYPE, toPlainBytes };
+module.exports = { activate, deactivate, PptxEditorProvider, VIEW_TYPE, toPlainBytes, WEBVIEW_COMMANDS };

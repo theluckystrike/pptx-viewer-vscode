@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 (2026-11-06)
+
+- Zoom. The toolbar has `-` and `+` buttons and a zoom list with Fit slide, Fit width and sizes from 50% to 400%. `Ctrl` or `Cmd` with the mouse wheel zooms around the mouse, and so does a trackpad pinch. `+`, `-` and `0` work in the viewer, and `Ctrl+=` and `Ctrl+-` (`Cmd` on macOS) too. A zoomed slide scrolls.
+- Scroll view. The "Scroll" button shows every slide in one column, like a document. The slide in view becomes the current one, and the thumbnails, slide number and notes follow it. Slides are drawn only as they come near the view.
+- Each file keeps its last view and zoom in the workspace. New settings `pptxViewer.defaultView` and `pptxViewer.defaultZoom` set how a deck opens the first time.
+- New commands "PPTX: Zoom In", "Zoom Out", "Zoom to Fit Slide", "Zoom to Fit Width", "Zoom to 100%" and "Toggle Scroll View (All Slides in One Column)".
+- The toolbar wraps onto a second line in a narrow editor, so no button is cut off.
+
 ## 0.1.4 (2026-11-06)
 
 - The Marketplace page now starts with a screenshot of a real VS Code window with slides, thumbnails and speaker notes, and a short GIF of moving between slides and searching. Both were made from generated sample files. The images load from the GitHub repo and are not packed into the extension, so the download size stays the same.
@@ -23,7 +31,7 @@
 
 ## 0.1.0
 
-- First release: open .pptx, .ppsx, .potx and .pptm decks as slides with thumbnails.
+- First release. It opens .pptx, .ppsx, .potx and .pptm decks as slides with thumbnails.
 - Speaker notes under each slide, a text outline, and search across titles, text, tables and notes.
 - Copy the current slide or the whole deck as Markdown.
 - Clear notice on slides with SmartArt, video, audio, embedded objects or charts.
