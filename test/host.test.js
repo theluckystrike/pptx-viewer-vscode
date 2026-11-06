@@ -122,3 +122,33 @@ test('renderSlides off sends text only; a broken file sends an error', async () 
     assert.match(p.sent[1].message, /not a ZIP package/);
   } finally { fs.unlinkSync(bad); }
 });
+
+// ---------- support links (Sponsor, More free viewers) ----------
+test('support: package.json has the sponsor field, the two commands and the setting', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+  const support = require('../src/support');
+  assert.equal(pkg.sponsor.url, 'https://github.com/sponsors/theluckystrike');
+  assert.equal(pkg.sponsor.url, support.sponsorUrl());
+  const ids = pkg.contributes.commands.map((c) => c.command);
+  assert.ok(ids.includes('pptxViewer.supportDeveloper') && ids.includes('pptxViewer.moreViewers'));
+  const cfg = Array.isArray(pkg.contributes.configuration) ? pkg.contributes.configuration : [pkg.contributes.configuration];
+  const props = Object.assign({}, ...cfg.map((c) => c.properties));
+  assert.equal(props['pptxViewer.showSupportLinks'].default, true);
+  assert.ok(support.otherProducts('zovo.pptx-slide-viewer').every((p) => p.id !== 'zovo.pptx-slide-viewer'));
+});
+
+test('support: the footer shows by default and pptxViewer.showSupportLinks=false hides it', () => {
+  ext.activate({ subscriptions: [], extensionUri: uri('/ext') });
+  assert.ok(commands.has('pptxViewer.supportDeveloper') && commands.has('pptxViewer.moreViewers'));
+  for (const [value, shown] of [[undefined, true], [false, false]]) {
+    if (value === undefined) delete settings.showSupportLinks; else settings.showSupportLinks = value;
+    try {
+      const provider = new ext.PptxEditorProvider({ extensionUri: uri('/ext') });
+      const p = openPanel(provider, 'quarterly-review.pptx');
+      const html = p.panel.webview.html;
+      assert.equal(/id="zovo-support"/.test(html), shown, String(value));
+      assert.equal(html.includes('command:pptxViewer.moreViewers'), shown);
+      assert.deepEqual(p.panel.webview.options.enableCommandUris, ['pptxViewer.supportDeveloper', 'pptxViewer.moreViewers', 'workbench.action.openSettings']);
+    } finally { delete settings.showSupportLinks; }
+  }
+});

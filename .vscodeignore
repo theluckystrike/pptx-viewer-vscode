@@ -9,3 +9,4 @@ icon.svg
 .vscode/**
 **/*.map
 package-lock.json
+.github/**

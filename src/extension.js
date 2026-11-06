@@ -5,6 +5,7 @@ const { buildHtml } = require('./html');
 const { parseWebviewMessage, readConfig } = require('./protocol');
 const { parseDeck, slideToMarkdown, deckToMarkdown } = require('./pptx');
 const { createRatingPrompt } = require('./rate');
+const { registerSupport, commandUris, showLinks } = require('./support');
 
 let rating = { success() {} };
 
@@ -40,9 +41,10 @@ class PptxEditorProvider {
   async resolveCustomEditor(document, panel) {
     const media = vscode.Uri.joinPath(this.context.extensionUri, 'media');
     const webview = panel.webview;
-    webview.options = { enableScripts: true, localResourceRoots: [media] };
+    // Command links are limited to the two support commands and the settings page (footer "Hide" link).
+    webview.options = { enableScripts: true, localResourceRoots: [media], enableCommandUris: commandUris('pptxViewer') };
     const u = (...p) => webview.asWebviewUri(vscode.Uri.joinPath(media, ...p)).toString();
-    webview.html = buildHtml({ css: u('viewer.css'), core: u('core.js'), viewer: u('viewer.js'), preview: u('vendor', 'pptx-preview.umd.js') }, webview.cspSource);
+    webview.html = buildHtml({ css: u('viewer.css'), core: u('core.js'), viewer: u('viewer.js'), preview: u('vendor', 'pptx-preview.umd.js') }, webview.cspSource, undefined, { showSupportLinks: showLinks(vscode, 'pptxViewer') });
 
     const fileName = path.posix.basename(document.uri.path);
     const entry = { panel, uri: document.uri, deck: null, slide: 1, forceLoad: false, ready: false };
@@ -134,6 +136,7 @@ class PptxEditorProvider {
 
 function activate(context) {
   rating = createRatingPrompt({ vscode, context, extensionId: 'zovo.pptx-slide-viewer', section: 'pptxViewer', message: (n) => `PPTX Viewer has opened ${n} files for you. A rating helps other people find it.` });
+  registerSupport({ vscode, context, prefix: 'pptxViewer', selfId: 'zovo.pptx-slide-viewer' });
   const provider = new PptxEditorProvider(context);
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(VIEW_TYPE, provider, {

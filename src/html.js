@@ -1,5 +1,6 @@
 'use strict';
 const crypto = require('crypto');
+const { footerHtml, FOOTER_CSS } = require('./support');
 
 function escapeAttr(s) {
   return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -26,7 +27,10 @@ function buildCsp(cspSource, nonce) {
   ].join('; ');
 }
 
-function buildHtml(uris, cspSource, nonce = crypto.randomBytes(16).toString('base64')) {
+// opts.showSupportLinks: false hides the small Sponsor and More free viewers footer (setting pptxViewer.showSupportLinks).
+// The footer style is a plain style tag: style-src already allows 'unsafe-inline' (a nonce there would turn it off).
+function buildHtml(uris, cspSource, nonce = crypto.randomBytes(16).toString('base64'), opts) {
+  const footer = footerHtml('pptxViewer', !(opts && opts.showSupportLinks === false), 'zovo-support-fixed');
   const csp = buildCsp(cspSource, nonce);
   return `<!DOCTYPE html>
 <html lang="en">
@@ -35,6 +39,7 @@ function buildHtml(uris, cspSource, nonce = crypto.randomBytes(16).toString('bas
 <meta http-equiv="Content-Security-Policy" content="${escapeAttr(csp)}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="${escapeAttr(uris.css)}">
+${footer ? `<style>${FOOTER_CSS}</style>` : ''}
 <title>PPTX Slide Viewer</title>
 </head>
 <body>
@@ -70,6 +75,7 @@ function buildHtml(uris, cspSource, nonce = crypto.randomBytes(16).toString('bas
   </section>
 </div>
 <div id="renderHost" aria-hidden="true"></div>
+${footer}
 <script nonce="${nonce}" src="${escapeAttr(uris.preview)}"></script>
 <script nonce="${nonce}" src="${escapeAttr(uris.core)}"></script>
 <script nonce="${nonce}" src="${escapeAttr(uris.viewer)}"></script>
