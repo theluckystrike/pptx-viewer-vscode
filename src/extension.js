@@ -4,6 +4,9 @@ const path = require('path');
 const { buildHtml } = require('./html');
 const { parseWebviewMessage, readConfig } = require('./protocol');
 const { parseDeck, slideToMarkdown, deckToMarkdown } = require('./pptx');
+const { createRatingPrompt } = require('./rate');
+
+let rating = { success() {} };
 
 const VIEW_TYPE = 'pptxViewer.preview';
 const CONFIG = 'pptxViewer';
@@ -61,6 +64,7 @@ class PptxEditorProvider {
         // Text first: the outline, notes and search work before any slide is drawn.
         entry.deck = parseDeck(data);
         send({ type: 'deck', deck: entry.deck, fileName });
+        if (!entry.counted) { entry.counted = true; rating.success(); }
         if (cfg.renderSlides) send({ type: 'bytes', data: toPlainBytes(data) });
       } catch (e) {
         send({ type: 'error', message: e && e.message ? e.message : String(e) });
@@ -129,6 +133,7 @@ class PptxEditorProvider {
 }
 
 function activate(context) {
+  rating = createRatingPrompt({ vscode, context, extensionId: 'zovo.pptx-slide-viewer', section: 'pptxViewer', message: (n) => `PPTX Viewer has opened ${n} files for you. A rating helps other people find it.` });
   const provider = new PptxEditorProvider(context);
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(VIEW_TYPE, provider, {

@@ -2,7 +2,7 @@
   "name": "pptx-slide-viewer",
   "displayName": "PPTX Viewer for PowerPoint Slides",
   "description": "PPTX viewer for PowerPoint decks (.pptx, .ppsx, .potx) in VS Code with slides, thumbnails, speaker notes, search and copy as Markdown, all offline.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -168,6 +168,11 @@
           "type": "boolean",
           "default": true,
           "description": "Draw the slides. Turn off to show only the text outline and notes, which is faster for very large decks."
+        },
+        "pptxViewer.askForRating": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask one time for a Marketplace rating after you have used PPTX Viewer for a few days. You can answer \"Later\" or \"Don't ask again\". Nothing is sent anywhere."
         }
       }
     },

@@ -55,6 +55,7 @@ SmartArt, video, audio, ink and embedded objects are not drawn. A slide that has
 | `pptxViewer.maxFileSizeMB` | `150` | Ask before opening larger decks |
 | `pptxViewer.showNotes` | `true` | Show speaker notes under the slide |
 | `pptxViewer.renderSlides` | `true` | Draw the slides. Set to `false` to see only the outline, notes and search |
+| `pptxViewer.askForRating` | `true` | Ask one time for a Marketplace rating, after 5 files and 2 days. Turn it off with `false` |
 
 ## Large decks
 
