@@ -10,3 +10,4 @@ icon.svg
 **/*.map
 package-lock.json
 .github/**
+images/**

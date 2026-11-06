@@ -1,12 +1,12 @@
 # PPTX Viewer for PowerPoint Slides
 
-Open PowerPoint decks in VS Code and read the slides, speaker notes and every word of text without leaving the editor.
+For developers who get slide decks in a repo or a pull request, PPTX Viewer opens PowerPoint files in VS Code with thumbnails, speaker notes and search.
 
 <p><a href="https://marketplace.visualstudio.com/items?itemName=zovo.pptx-slide-viewer"><img src="https://img.shields.io/visual-studio-marketplace/v/zovo.pptx-slide-viewer" alt="Version"></a> <a href="https://marketplace.visualstudio.com/items?itemName=zovo.pptx-slide-viewer"><img src="https://img.shields.io/visual-studio-marketplace/i/zovo.pptx-slide-viewer" alt="Installs"></a> <a href="https://open-vsx.org/extension/zovo/pptx-slide-viewer"><img src="https://img.shields.io/open-vsx/v/zovo/pptx-slide-viewer" alt="Open VSX"></a></p>
 
-<img src="images/screenshot-slides.png" alt="A 16:9 deck open in the viewer. Six slide thumbnails on the left, slide 4 with a photo, a blue rounded box and a green circle in the middle, and its speaker notes underneath." width="100%">
+![A 6 slide deck open in VS Code. Slide thumbnails on the left, slide 4 with a photo, a blue rounded box and a green circle in the middle, and its speaker notes underneath](https://raw.githubusercontent.com/theluckystrike/pptx-viewer-vscode/main/images/vscode-pptx.png)
 
-*Real output. The extension's own webview renders [`test/fixtures/quarterly-review.pptx`](test/fixtures/quarterly-review.pptx) (made by [`scripts/make-samples.py`](scripts/make-samples.py)) and headless Chromium captures it in [`test/e2e/run.py`](test/e2e/run.py).*
+*A real VS Code 1.142 window running this extension on [`test/fixtures/quarterly-review.pptx`](test/fixtures/quarterly-review.pptx), made by [`scripts/make-samples.py`](scripts/make-samples.py).*
 
 - See each slide with thumbnails, and its speaker notes right under it.
 - Search titles, bullets, table cells and notes across the whole deck, then jump to the slide.
@@ -16,6 +16,10 @@ Open PowerPoint decks in VS Code and read the slides, speaker notes and every wo
 
 1. Install the extension.
 2. Click any `.pptx`, `.ppsx`, `.potx` or `.pptm` file in the Explorer. Press `Ctrl+F` (`Cmd+F` on macOS) to search.
+
+![A click on the .pptx file opens slide 1. Clicks on the thumbnails move to slides 2, 3 and 4, and a search for latency lists the matching slides in the Outline tab](https://raw.githubusercontent.com/theluckystrike/pptx-viewer-vscode/main/images/demo-pptx.gif)
+
+*Recorded in the same window. The white arrow is drawn in to show where each click lands.*
 
 Run "Get Started with PPTX Slide Viewer" from the Welcome page for a short tour.
 
