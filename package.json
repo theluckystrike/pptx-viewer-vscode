@@ -1,0 +1,239 @@
+{
+  "name": "pptx-slide-viewer",
+  "displayName": "PPTX Slide Viewer",
+  "description": "Open PowerPoint .pptx, .ppsx and .potx files in VS Code: slides, thumbnails, speaker notes, outline search and copy slide text as Markdown. Offline.",
+  "version": "0.1.0",
+  "publisher": "zovo",
+  "license": "MIT",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#3B1F14",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.90.0",
+    "node": ">=18"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "pptx",
+    "ppt",
+    "powerpoint",
+    "slides",
+    "slide",
+    "presentation",
+    "deck",
+    "ppsx",
+    "potx",
+    "pptm",
+    "viewer",
+    "preview",
+    "office",
+    "microsoft office",
+    "openxml",
+    "ooxml",
+    "speaker notes",
+    "outline",
+    "thumbnails",
+    "keynote",
+    "slide deck",
+    "read pptx",
+    "open pptx",
+    "pptx to markdown",
+    "markdown",
+    "search",
+    "document viewer",
+    "file viewer",
+    "reader",
+    "offline"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  },
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "pptxViewer.preview",
+        "displayName": "PPTX Slide Viewer",
+        "selector": [
+          {
+            "filenamePattern": "*.pptx"
+          },
+          {
+            "filenamePattern": "*.ppsx"
+          },
+          {
+            "filenamePattern": "*.potx"
+          },
+          {
+            "filenamePattern": "*.pptm"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "pptxViewer.copySlideMarkdown",
+        "title": "Copy Slide Text as Markdown",
+        "category": "PPTX",
+        "icon": "$(markdown)"
+      },
+      {
+        "command": "pptxViewer.copyDeckMarkdown",
+        "title": "Copy All Slides as Markdown",
+        "category": "PPTX"
+      },
+      {
+        "command": "pptxViewer.find",
+        "title": "Search Slides and Notes",
+        "category": "PPTX"
+      },
+      {
+        "command": "pptxViewer.toggleNotes",
+        "title": "Toggle Speaker Notes",
+        "category": "PPTX"
+      },
+      {
+        "command": "pptxViewer.openWith",
+        "title": "Open with PPTX Slide Viewer",
+        "category": "PPTX"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "pptxViewer.copySlideMarkdown",
+          "when": "activeCustomEditorId == pptxViewer.preview",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "pptxViewer.openWith",
+          "when": "resourceExtname =~ /^\\.(pptx|ppsx|potx|pptm)$/i",
+          "group": "navigation@99"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "pptxViewer.copySlideMarkdown",
+          "when": "activeCustomEditorId == pptxViewer.preview"
+        },
+        {
+          "command": "pptxViewer.copyDeckMarkdown",
+          "when": "activeCustomEditorId == pptxViewer.preview"
+        },
+        {
+          "command": "pptxViewer.find",
+          "when": "activeCustomEditorId == pptxViewer.preview"
+        },
+        {
+          "command": "pptxViewer.toggleNotes",
+          "when": "activeCustomEditorId == pptxViewer.preview"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "pptxViewer.find",
+        "key": "ctrl+f",
+        "mac": "cmd+f",
+        "when": "activeCustomEditorId == pptxViewer.preview && !sideBarFocus && !panelFocus && !inQuickOpen"
+      }
+    ],
+    "configuration": {
+      "title": "PPTX Slide Viewer",
+      "properties": {
+        "pptxViewer.maxFileSizeMB": {
+          "type": "number",
+          "default": 150,
+          "minimum": 1,
+          "description": "Ask before opening decks larger than this, in MB."
+        },
+        "pptxViewer.showNotes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the speaker notes under the slide."
+        },
+        "pptxViewer.renderSlides": {
+          "type": "boolean",
+          "default": true,
+          "description": "Draw the slides. Turn off to show only the text outline and notes, which is faster for very large decks."
+        }
+      }
+    },
+    "walkthroughs": [
+      {
+        "id": "pptxViewer.start",
+        "title": "Get started with PPTX Slide Viewer",
+        "description": "Open a deck, read the notes, search every slide and copy the text as Markdown.",
+        "steps": [
+          {
+            "id": "open",
+            "title": "Open a deck",
+            "description": "Click any .pptx, .ppsx or .potx file in the Explorer. It opens in this viewer.\n[Open a deck](command:pptxViewer.openWith)",
+            "media": {
+              "image": "images/screenshot-slides.png",
+              "altText": "A deck open in the viewer with thumbnails on the left and notes under the slide."
+            },
+            "completionEvents": [
+              "onCommand:pptxViewer.openWith"
+            ]
+          },
+          {
+            "id": "search",
+            "title": "Search slides and notes",
+            "description": "Press Ctrl+F (Cmd+F on macOS) and type. The Outline tab lists every slide whose title, text or notes match.\n[Search](command:pptxViewer.find)",
+            "media": {
+              "markdown": "walkthrough/search.md"
+            },
+            "completionEvents": [
+              "onCommand:pptxViewer.find"
+            ]
+          },
+          {
+            "id": "markdown",
+            "title": "Copy slide text as Markdown",
+            "description": "The Markdown button copies the title, bullets, tables and notes of the slide. Paste them into a README, an issue or a chat.\n[Copy slide as Markdown](command:pptxViewer.copySlideMarkdown)",
+            "media": {
+              "markdown": "walkthrough/markdown.md"
+            },
+            "completionEvents": [
+              "onCommand:pptxViewer.copySlideMarkdown"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node --test test/*.test.js",
+    "test:browser": "python3 test/e2e/run.py",
+    "package": "node scripts/build.js && node -e \"require('fs').mkdirSync('dist',{recursive:true})\" && npx -y @vscode/vsce@3 package --no-dependencies -o dist/"
+  },
+  "homepage": "https://github.com/theluckystrike/pptx-viewer-vscode#readme",
+  "bugs": {
+    "url": "https://github.com/theluckystrike/pptx-viewer-vscode/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theluckystrike/pptx-viewer-vscode.git"
+  },
+  "dependencies": {
+    "fflate": "0.8.3",
+    "pptx-preview": "1.0.7"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.2"
+  }
+}
