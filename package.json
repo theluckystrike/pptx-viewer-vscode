@@ -2,7 +2,7 @@
   "name": "pptx-slide-viewer",
   "displayName": "PPTX Viewer & PowerPoint Viewer",
   "description": "PPTX viewer for PowerPoint decks (.pptx, .ppsx, .potx) in VS Code with slides, thumbnails, speaker notes, search and copy as Markdown, all offline.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
