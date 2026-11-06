@@ -10,4 +10,5 @@ icon.svg
 **/*.map
 package-lock.json
 .github/**
-images/**
+images/vscode-*
+images/demo-*
