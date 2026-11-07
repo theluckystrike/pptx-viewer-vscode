@@ -9,7 +9,7 @@ const { parsePpt, sniffPpt } = require('./ppt');
 const { createRatingPrompt } = require('./rate');
 const { registerSupport, commandUris, showLinks } = require('./support');
 
-let rating = { success() {} };
+let rating = { success() {}, failure() {} };
 
 const VIEW_TYPE = 'pptxViewer.preview';
 const CONFIG = 'pptxViewer';
@@ -118,9 +118,12 @@ class PptxEditorProvider {
         const { deck, drawable } = readDeck(data, fileName);
         entry.deck = deck;
         send({ type: 'deck', deck: entry.deck, fileName });
-        if (!entry.counted) { entry.counted = true; rating.success(); }
+        // Rating: a deck counts once its slides are drawn (webview 'rendered'), or now if no slide is drawn.
+        entry.waitRender = !!(cfg.renderSlides && drawable);
+        if (!entry.waitRender && !entry.counted) { entry.counted = true; rating.success(); }
         if (cfg.renderSlides && drawable) send({ type: 'bytes', data: toPlainBytes(data) });
       } catch (e) {
+        rating.failure();
         send({ type: 'error', message: e && e.message ? e.message : String(e) });
       }
     };
@@ -155,8 +158,10 @@ class PptxEditorProvider {
         vscode.window.showWarningMessage('PPTX Viewer: ' + m.message);
       } else if (m.type === 'rendered') {
         entry.rendered = m;
+        if (entry.waitRender && !entry.counted) { entry.counted = true; rating.success(); }
       } else if (m.type === 'error') {
         entry.lastError = m.message;
+        rating.failure();
       }
     }));
 
@@ -220,7 +225,7 @@ class PptxEditorProvider {
 }
 
 function activate(context) {
-  rating = createRatingPrompt({ vscode, context, extensionId: 'zovo.pptx-slide-viewer', section: 'pptxViewer', message: (n) => `PPTX Viewer has opened ${n} files for you. A rating helps other people find it.` });
+  rating = createRatingPrompt({ vscode, context, extensionId: 'zovo.pptx-slide-viewer', section: 'pptxViewer', name: 'PPTX Viewer' });
   registerSupport({ vscode, context, prefix: 'pptxViewer', selfId: 'zovo.pptx-slide-viewer' });
   const provider = new PptxEditorProvider(context);
   context.subscriptions.push(

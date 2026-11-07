@@ -14,6 +14,7 @@
 - "Fit" leaves room for the message above a slide, so the slide no longer gets scroll bars. The copy buttons sit in one "Copy: Markdown, PNG, All" group, and the toolbar stays on one row in a normal window.
 - Shapes with broken outlines no longer fill the developer console with errors.
 - The Marketplace name is now "PPTX Viewer & PPT Viewer, PowerPoint Viewer & Slideshow". The extension ID, settings and commands stay the same.
+- The rating question now comes after 3 files that opened without an error on 2 different days, and never after an error. "Later" asks one more time after 7 days, "No thanks" ends it, and it never asks more than 2 times. `pptxViewer.askForRating: false` turns it off.
 
 ## 0.3.0 (2026-11-07)
 
