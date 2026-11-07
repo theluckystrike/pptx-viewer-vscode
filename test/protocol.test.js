@@ -27,10 +27,10 @@ test('error messages are truncated', () => {
 
 test('config defaults and size limit', () => {
   const c = readConfig((k, d) => d);
-  assert.equal(c.maxFileSizeBytes, 150 * 1024 * 1024);
+  assert.equal(c.maxFileSizeBytes, 300 * 1024 * 1024);
   assert.equal(c.showNotes, true);
   assert.equal(c.renderSlides, true);
-  assert.equal(readConfig((k, d) => (k === 'maxFileSizeMB' ? -5 : d)).maxFileSizeBytes, 150 * 1024 * 1024);
+  assert.equal(readConfig((k, d) => (k === 'maxFileSizeMB' ? -5 : d)).maxFileSizeBytes, 300 * 1024 * 1024);
   assert.equal(readConfig((k, d) => (k === 'renderSlides' ? false : d)).renderSlides, false);
 });
 

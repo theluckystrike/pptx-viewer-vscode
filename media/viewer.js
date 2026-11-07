@@ -3,6 +3,13 @@
 // Slide drawing is done by pptx-preview into a hidden host; we clone its slide nodes.
 (function () {
   const vscode = acquireVsCodeApi();
+  // Some shapes in real decks give the renderer a path with NaN coordinates. Such a path never draws;
+  // write it as an empty path so the browser does not log an error for each one.
+  const setAttr = Element.prototype.setAttribute;
+  Element.prototype.setAttribute = function (name, value) {
+    if (name === 'd' && typeof value === 'string' && value.includes('NaN')) value = 'M0,0';
+    return setAttr.call(this, name, value);
+  };
   const C = window.PptxCore;
   const $ = (id) => document.getElementById(id);
   const el = (tag, cls, text) => {
@@ -63,6 +70,8 @@
       else if (m.name === 'zoomActual') setZoom(1);
       else if (m.name === 'toggleScrollView') setView(state.view === 'scroll' ? 'slide' : 'scroll');
       else if (m.name === 'present') setPresent(!state.presenting);
+      else if (m.name === 'copySlidePng') copyPng();
+      else if (m.name === 'saveSlidePng') savePng();
     }
   });
 
@@ -72,7 +81,21 @@
     return b;
   }
 
+  // The toolbar works only when a deck with slides is open. Before that, and when a file cannot be
+  // opened, the page box reads "– / –" and every deck button is greyed out (VER5 finding 2).
+  const DECK_CONTROLS = ['prevBtn', 'nextBtn', 'slideInput', 'zoomOutBtn', 'zoomSelect', 'zoomInBtn', 'scrollBtn', 'presentBtn', 'searchInput', 'notesBtn', 'mdBtn', 'pngBtn', 'mdAllBtn'];
+  function setDeckControls(on) {
+    for (const id of DECK_CONTROLS) $(id).disabled = !on;
+    document.body.classList.toggle('noDeck', !on);
+    if (!on) { $('slideInput').value = '–'; $('slideCount').textContent = '/ –'; }
+  }
+
   function showError(text) {
+    if (state.presenting) setPresent(false);
+    // Nothing from an earlier copy of the file stays on screen under the message.
+    state.deck = null; state.drawn = null; state.renderer = null; drawGen++;
+    $('stage').replaceChildren(); $('thumbs').replaceChildren(); $('outline').replaceChildren(); $('notes').replaceChildren();
+    setDeckControls(false);
     const box = $('notice');
     box.replaceChildren(el('strong', null, 'Cannot open this file. '), document.createTextNode(text + ' '), openExternalButton());
     box.hidden = false;
@@ -97,6 +120,7 @@
     state.current = C.clampSlide(state.current, n);
     $('slideCount').textContent = '/ ' + n;
     if (!n) { status(''); showError('The deck has no slides.'); return; }
+    setDeckControls(true);
     buildThumbs();
     buildOutline();
     status(state.config.renderSlides && !deck.legacy ? `Drawing ${n} slides…` : '');
@@ -117,24 +141,37 @@
   }
 
   // ---- drawing with pptx-preview ----
+  // The deck is read once; each slide is drawn the first time it is shown (stage, thumbnail, scroll
+  // view, Present). A large deck shows its first slide without waiting for all the others, and a
+  // slide the renderer cannot draw falls back to its text alone instead of stopping the whole deck.
+  let drawGen = 0;
   async function draw(data) {
     const deck = state.deck;
+    const gen = ++drawGen;
     if (!deck || typeof pptxPreview === 'undefined') { state.drawError = 'The slide renderer did not load.'; renderStage(); return; }
     const t0 = performance.now();
     const host = $('renderHost');
     host.replaceChildren();
     const box = el('div');
     host.appendChild(box);
+    state.renderer = null;
+    state.drawn = null;
     try {
       const buf = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
       const previewer = pptxPreview.init(box, { width: deck.widthPx, height: deck.heightPx, mode: 'list' });
-      await previewer.preview(buf);
-      const nodes = Array.from(box.querySelectorAll('.pptx-preview-slide-wrapper'));
-      state.drawn = nodes;
+      await previewer.load(buf);
+      if (gen !== drawGen) return; // a newer copy of the file arrived meanwhile
+      const count = previewer.pptx && previewer.pptx.slides ? previewer.pptx.slides.length : 0;
+      state.renderer = { html: previewer.htmlRender, box, count };
+      state.drawn = new Array(count).fill(undefined);
       status(deck.hasMacros ? 'This deck contains macros. They are never run.' : '');
-      vscode.postMessage({ type: 'rendered', slides: nodes.length, ms: Math.round(performance.now() - t0) });
+      // Draw the slide on screen now, so the time reported is the time to the first picture.
+      drawnNode(state.current);
+      vscode.postMessage({ type: 'rendered', slides: count, ms: Math.round(performance.now() - t0) });
     } catch (e) {
+      if (gen !== drawGen) return;
       state.drawn = null;
+      state.renderer = null;
       state.drawError = 'Could not draw the slides (' + (e && e.message ? e.message : String(e)) + '). Text, notes and search still work.';
       status('');
       vscode.postMessage({ type: 'error', message: state.drawError });
@@ -144,8 +181,29 @@
     renderPresent();
   }
 
+  // The drawn node of slide i (1-based), drawn now if needed. null when it cannot be drawn.
+  function drawnNode(i) {
+    const r = state.renderer;
+    if (!r || !state.drawn || i < 1 || i > r.count) return null;
+    const have = state.drawn[i - 1];
+    if (have !== undefined) return have;
+    let node = null;
+    try {
+      r.html.renderSlide(i - 1);
+      const all = r.box.querySelectorAll('.pptx-preview-slide-wrapper-' + (i - 1));
+      node = all.length ? all[all.length - 1] : null;
+    } catch (e) {
+      node = null;
+      // Remove a half-drawn slide, if the renderer left one.
+      for (const n of r.box.querySelectorAll('.pptx-preview-slide-wrapper-' + (i - 1))) n.remove();
+      state.slideErrors = (state.slideErrors || 0) + 1;
+    }
+    state.drawn[i - 1] = node;
+    return node;
+  }
+
   function slideClone(i, scale) {
-    const src = state.drawn && state.drawn[i - 1];
+    const src = drawnNode(i);
     if (!src) return null;
     const deck = state.deck;
     const frame = el('div', 'slideFrame');
@@ -213,6 +271,8 @@
     if (!deck) return;
     const slide = deck.slides[state.current - 1];
     const stage = $('stage');
+    // The notice above the slide takes room; show it first, so Fit leaves room for it.
+    renderSlideInfo();
     state.scale = currentScale();
     updateZoomControls();
     if (state.view === 'scroll') renderScrollList();
@@ -222,13 +282,13 @@
       stage.replaceChildren(clone || textSlide(slide));
       if (slide.hidden) stage.appendChild(el('div', 'badge', 'Hidden slide'));
     }
-    renderSlideInfo();
   }
 
   // Notice and notes for the current slide. Used on its own while the scroll view scrolls.
   function renderSlideInfo() {
     const slide = state.deck.slides[state.current - 1];
-    const msg = state.drawError || C.noticeMessage(slide.notices);
+    const undrawable = state.view !== 'scroll' && state.drawn && state.drawn[state.current - 1] === null;
+    const msg = state.drawError || (undrawable ? C.UNDRAWABLE_MESSAGE + ' ' : '') + C.noticeMessage(slide.notices);
     const box = $('notice');
     if (msg) { box.textContent = msg; box.className = state.drawError ? 'error' : 'info'; box.hidden = false; }
     else if (box.className !== 'warn') box.hidden = true;
@@ -276,11 +336,10 @@
   }
 
   function fillScrollItem(item) {
-    if (item.dataset.filled) return;
+    if (item.dataset.filled || !state.deck) return;
     const i = parseInt(item.dataset.index, 10);
     const slide = state.deck.slides[i - 1];
-    const node = slideClone(i, state.scale) || (state.drawn ? null : textSlide(slide));
-    if (!node) return;
+    const node = slideClone(i, state.scale) || textSlide(slide);
     item.querySelector('.scrollPh').replaceWith(node);
     item.dataset.filled = '1';
   }
@@ -450,6 +509,7 @@
   }
 
   function runSearch() {
+    if (!state.deck) return;
     state.query = $('searchInput').value.trim();
     state.hits = C.searchDeck(state.deck, state.query);
     state.hitPos = -1;
@@ -510,6 +570,7 @@
   $('notesBtn').addEventListener('click', () => { state.notes = !state.notes; applyNotes(); });
   $('mdBtn').addEventListener('click', () => vscode.postMessage({ type: 'copySlideMarkdown', slide: state.current }));
   $('mdAllBtn').addEventListener('click', () => vscode.postMessage({ type: 'copyDeckMarkdown' }));
+  $('pngBtn').addEventListener('click', (e) => { if (e.shiftKey) savePng(); else copyPng(); });
   $('zoomInBtn').addEventListener('click', () => zoomStep(1));
   $('zoomOutBtn').addEventListener('click', () => zoomStep(-1));
   $('zoomSelect').addEventListener('change', () => {
@@ -531,6 +592,73 @@
     if (e.key === 'Enter') { e.preventDefault(); clearTimeout(searchTimer); if (state.query !== $('searchInput').value.trim()) runSearch(); nextHit(e.shiftKey ? -1 : 1); }
     else if (e.key === 'Escape') { $('searchInput').value = ''; runSearch(); setTab('slides'); }
   });
+  // ---- slide as PNG: the drawn slide, about 1920 px wide, on white ----
+  // The slide's own nodes are put in an SVG foreignObject (pictures are already data: URLs, so
+  // nothing is fetched) and drawn on a canvas. Chart canvases are swapped for pictures of themselves.
+  async function slidePng(n) {
+    const deck = state.deck;
+    const src = deck && drawnNode(n);
+    if (!src) throw new Error(state.drawn ? 'This slide could not be drawn, so there is no picture of it. Copy as Markdown copies its text.' : 'Old .ppt files and text-only mode have no slide pictures. Copy as Markdown copies the text.');
+    const k = Math.min(3, Math.max(1, 1920 / deck.widthPx));
+    const w = Math.round(deck.widthPx * k);
+    const h = Math.round(deck.heightPx * k);
+    const clone = src.cloneNode(true);
+    const from = src.querySelectorAll('canvas');
+    clone.querySelectorAll('canvas').forEach((c, i) => {
+      try {
+        const img = document.createElement('img');
+        img.src = from[i].toDataURL('image/png');
+        img.style.cssText = c.style.cssText;
+        img.style.width = img.style.width || c.width + 'px';
+        img.style.height = img.style.height || c.height + 'px';
+        c.replaceWith(img);
+      } catch (e) { c.remove(); }
+    });
+    Object.assign(clone.style, { position: 'absolute', left: '0', top: '0', margin: '0', width: deck.widthPx + 'px', height: deck.heightPx + 'px', transform: `scale(${k})`, transformOrigin: '0 0' });
+    const xhtml = new XMLSerializer().serializeToString(clone);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><foreignObject x="0" y="0" width="${w}" height="${h}"><div xmlns="http://www.w3.org/1999/xhtml" style="position:relative;width:${w}px;height:${h}px;overflow:hidden;background:#fff">${xhtml}</div></foreignObject></svg>`;
+    const img = new Image();
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    await img.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0);
+    const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+    if (!blob) throw new Error('The picture could not be made.');
+    return blob;
+  }
+
+  function pngFailed(e) {
+    vscode.postMessage({ type: 'pngFailed', message: e && e.message ? e.message : String(e) });
+  }
+
+  async function copyPng() {
+    if (!state.deck) return;
+    const n = state.current;
+    try {
+      // The promise form keeps the click's permission to write the clipboard while the picture is made.
+      const made = slidePng(n);
+      made.catch(() => {});
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': made })]);
+      vscode.postMessage({ type: 'pngDone', slide: n });
+    } catch (e) {
+      pngFailed(e && e.name === 'NotAllowedError' ? new Error('The clipboard did not accept the picture. Click in the slide and try again, or Shift+click Copy as PNG to save it as a file.') : e);
+    }
+  }
+
+  async function savePng() {
+    if (!state.deck) return;
+    const n = state.current;
+    try {
+      const blob = await slidePng(n);
+      vscode.postMessage({ type: 'savePng', slide: n, data: new Uint8Array(await blob.arrayBuffer()) });
+    } catch (e) { pngFailed(e); }
+  }
+
   // ---- Present: one slide at a time on black, fitted to the whole window ----
   function setPresent(on) {
     if (!state.deck || !state.deck.slides.length) return;
@@ -583,5 +711,6 @@
   let resizeTimer = null;
   window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (state.presenting) renderPresent(); else renderStage(); }, 100); });
 
+  setDeckControls(false);
   vscode.postMessage({ type: 'ready' });
 })();

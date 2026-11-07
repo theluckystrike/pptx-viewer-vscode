@@ -313,6 +313,68 @@ def run_all(browser, shots):
     check("hostile deck in scroll view: tags stay text", pg.eval_on_selector_all("#stage img[src=x], #stage script", "e => e.length") == 0 and pg.title() == "PPTX Slide Viewer")
     t.close()
 
+    # 12. (0.4.0) A python-pptx deck (default template): body text takes the master's sizes and
+    #     bullets, starts at the top of its box, and the right column is not the date placeholder.
+    t = Page(browser, FIX / "python-pptx-default.pptx", "dark")
+    pg = t.page
+    pg.wait_for_selector("#stage .slideFrame", timeout=20000)
+    pg.click('#thumbs .thumb[data-index="2"]')
+    pg.wait_for_timeout(200)
+    spans = pg.eval_on_selector_all("#stage .slideFrame span", """e => e.filter(s => s.children.length === 0 && s.textContent.trim()).map(s => [s.textContent.trim(), parseFloat(getComputedStyle(s).fontSize), s.getBoundingClientRect().top, getComputedStyle(s).letterSpacing, getComputedStyle(s).fontFamily])""")
+    size = {t_: px for t_, px, *_ in spans}
+    check("master body sizes 32/28/24 pt", (size.get("Body text from the master is 32 pt"), size.get("Second level is 28 pt"), size.get("Third level is 24 pt")) == (32, 28, 24), str(size))
+    check("master bullets are drawn (•, –)", "•" in size and "–" in size, str(list(size)))
+    fam = [f for t_, _, _, _, f in spans if t_.startswith("Body text")]
+    check("text uses the theme font with fallbacks, no squeeze", fam and fam[0].replace('"', '').startswith('Calibri, Carlito') and fam[0].endswith("sans-serif") and all(ls in ("normal", "0px") for t_, _, _, ls, _ in spans if t_.startswith("Body")), str(fam[:1]) + str([s[3] for s in spans][:3]))
+    title_top = [top for t_, _, top, *_ in spans if t_ == "What we found"][0]
+    body_top = [top for t_, _, top, *_ in spans if t_.startswith("Body text")][0]
+    frame_top = pg.eval_on_selector("#stage .slideFrame", "e => e.getBoundingClientRect().top")
+    frame_h = pg.eval_on_selector("#stage .slideFrame", "e => e.getBoundingClientRect().height")
+    check("body text starts at the top of its box (not centred)", (body_top - frame_top) / frame_h < 0.33, f"{(body_top - frame_top) / frame_h:.2f}")
+    pg.click('#thumbs .thumb[data-index="4"]')
+    pg.wait_for_timeout(200)
+    tops = dict(pg.eval_on_selector_all("#stage .slideFrame span", "e => e.filter(s => s.children.length === 0).map(s => [s.textContent.trim(), Math.round(s.getBoundingClientRect().top)])"))
+    check("two-content slide: both columns start at the same height", abs(tops.get("Left column text", 0) - tops.get("Right column text", -999)) <= 2, str(tops))
+    # Shift+click Copy as PNG: a real PNG of the slide, about 1920 px wide, sent to the host to save
+    pg.click('#thumbs .thumb[data-index="2"]')
+    pg.wait_for_timeout(150)
+    pg.click("#pngBtn", modifiers=["Shift"])
+    wait_js(pg, "() => window.__sent.some(m => m.type === 'savePng' || m.type === 'pngFailed')", 10000)
+    info = pg.evaluate("""async () => { const m = window.__sent.find(m => m.type === 'savePng'); if (!m) return window.__sent.filter(m => m.type === 'pngFailed');
+      const b = await createImageBitmap(new Blob([m.data], {type: 'image/png'})); const c = new OffscreenCanvas(b.width, b.height); const x = c.getContext('2d'); x.drawImage(b, 0, 0);
+      const px = x.getImageData(0, 0, b.width, b.height).data; let dark = 0; for (let i = 0; i < px.length; i += 4) if (px[i] < 100 && px[i+1] < 100 && px[i+2] < 100) dark++;
+      return { slide: m.slide, w: b.width, h: b.height, dark: dark / (b.width * b.height), sig: Array.from(m.data.slice(0, 4)) }; }""")
+    check("Save Slide as PNG: a 1920 px PNG of slide 2 with text on it", isinstance(info, dict) and info["slide"] == 2 and info["w"] == 1920 and info["h"] == 1440 and info["sig"] == [137, 80, 78, 71] and 0.005 < info["dark"] < 0.3, str(info))
+    check("python-pptx deck: no page errors", not t.errors, "; ".join(t.errors)[:300])
+    t.close()
+
+    # 12b. (0.4.0) Fit leaves room for the notice above the slide: no scroll bars on the chart slide
+    t = Page(browser, FIX / "quarterly-review.pptx", "dark")
+    pg = t.page
+    pg.wait_for_selector("#stage .slideFrame", timeout=20000)
+    pg.click('#thumbs .thumb[data-index="5"]')
+    pg.wait_for_timeout(300)
+    fit = pg.evaluate("() => { const s = document.getElementById('stage'); return { notice: !document.getElementById('notice').hidden, over: s.scrollHeight - s.clientHeight, overX: s.scrollWidth - s.clientWidth }; }")
+    check("Fit with a notice shown: the slide fits without scrolling", fit["notice"] and fit["over"] <= 1 and fit["overX"] <= 1, str(fit))
+    check("toolbar: Copy group with Markdown, PNG and All", pg.inner_text("#copyGroup").split() == ["Copy:", "Markdown", "PNG", "All"], pg.inner_text("#copyGroup"))
+    t.close()
+
+    # 13. (0.4.0) An empty file: clear message, toolbar greyed out, no "1 / 0", Present off
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        empty = pathlib.Path(d) / "empty.pptx"
+        empty.write_bytes(b"")
+        t = Page(browser, empty, "dark")
+        pg = t.page
+        pg.wait_for_selector("#notice.error", timeout=10000)
+        check("empty file: Cannot open message", "Cannot open this file" in pg.inner_text("#notice"), pg.inner_text("#notice")[:120])
+        check("empty file: page box reads – / –", pg.input_value("#slideInput") == "–" and pg.inner_text("#slideCount").strip() == "/ –", pg.input_value("#slideInput") + pg.inner_text("#slideCount"))
+        disabled = pg.eval_on_selector_all("#presentBtn, #nextBtn, #prevBtn, #mdBtn, #searchInput, #zoomInBtn", "e => e.every(x => x.disabled)")
+        check("empty file: Present, arrows, Markdown, search and zoom are disabled", disabled)
+        pg.keyboard.press("ArrowRight")
+        check("empty file: keys do nothing and nothing breaks", not t.errors and pg.input_value("#slideInput") == "–", "; ".join(t.errors)[:200])
+        t.close()
+
 
 if __name__ == "__main__":
     main()

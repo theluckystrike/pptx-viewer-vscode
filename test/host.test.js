@@ -13,13 +13,17 @@ let clipboard = '';
 const commands = new Map();
 const executed = [];
 const opened = [];
+const saveDialogs = [];
+const warnings = [];
+const written = [];
+let saveTarget;
 const uri = (p) => ({ path: p, fsPath: p, toString: () => 'file://' + p });
 const vscodeStub = {
   Uri: { joinPath: (u, ...p) => uri(path.posix.join(u.path, ...p)), parse: (s) => uri(s) },
   RelativePattern: class { constructor(b, p) { this.base = b; this.pattern = p; } },
   workspace: {
     getConfiguration: () => ({ get: (k, d) => (k in settings ? settings[k] : d) }),
-    fs: { stat: async (u) => ({ size: fs.statSync(u.path).size }), readFile: async (u) => fs.readFileSync(u.path) },
+    fs: { stat: async (u) => ({ size: fs.statSync(u.path).size }), readFile: async (u) => fs.readFileSync(u.path), writeFile: async (u, d) => { written.push([u.path, d]); } },
     createFileSystemWatcher: () => ({ onDidChange: () => ({ dispose() {} }), onDidCreate: () => ({ dispose() {} }), dispose() {} }),
     onDidChangeConfiguration: () => ({ dispose() {} }),
   },
@@ -27,6 +31,8 @@ const vscodeStub = {
     registerCustomEditorProvider: () => ({ dispose() {} }),
     setStatusBarMessage: () => ({ dispose() {} }),
     showOpenDialog: async () => undefined,
+    showSaveDialog: async (o) => { saveDialogs.push(o); return saveTarget; },
+    showWarningMessage: async (m) => { warnings.push(m); },
   },
   env: { clipboard: { writeText: async (t) => { clipboard = t; } }, openExternal: async (u) => { opened.push(u.path); return true; } },
   commands: { registerCommand: (id, fn) => { commands.set(id, fn); return { dispose() {} }; }, executeCommand: async (id) => { executed.push(id); } },
@@ -205,4 +211,50 @@ test('Present toggles Zen Mode on and off once, and not at all when the setting 
   assert.deepEqual(executed, []);
   delete settings.presentFullScreen;
   assert.ok(commands.has('pptxViewer.present'));
+});
+
+test('an empty (0-byte) file says it is empty, not "not a ZIP package"', async () => {
+  const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'pptx4-empty-'));
+  const file = path.join(dir, 'empty.pptx');
+  fs.writeFileSync(file, '');
+  try {
+    const { provider } = ext.activate({ subscriptions: [], extensionUri: uri('/ext') });
+    const sent = [];
+    let onMsg = null;
+    const panel = {
+      active: true, visible: true,
+      webview: { options: null, html: '', cspSource: 'x', asWebviewUri: (u) => ({ toString: () => u.path }), postMessage: async (m) => { sent.push(m); return true; }, onDidReceiveMessage: (fn) => { onMsg = fn; return { dispose() {} }; } },
+      onDidChangeViewState: () => ({ dispose() {} }),
+      onDidDispose: () => ({ dispose() {} }),
+    };
+    provider.resolveCustomEditor(provider.openCustomDocument(uri(file)), panel);
+    await onMsg({ type: 'ready' });
+    await wait();
+    const err = sent.find((m) => m.type === 'error');
+    assert.equal(err && err.message, ext.EMPTY_FILE_MESSAGE);
+    assert.match(err.message, /empty \(0 bytes\)/);
+    assert.ok(!sent.some((m) => m.type === 'bytes'));
+    assert.throws(() => ext.readDeck(new Uint8Array(0), 'x.ppt'), /empty/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('Save Slide as PNG: asks where (next to the deck), writes the bytes; a failure is a warning, not an error', async () => {
+  const { provider } = ext.activate({ subscriptions: [], extensionUri: uri('/ext') });
+  const p = openPanel(provider, 'quarterly-review.pptx');
+  await p.post({ type: 'ready' });
+  await wait();
+  const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
+  saveTarget = undefined;
+  await p.post({ type: 'savePng', slide: 3, data: png });
+  assert.equal(saveDialogs.at(-1).defaultUri.path, path.join(FIX, 'quarterly-review-slide-3.png'));
+  assert.equal(written.length, 0, 'cancel writes nothing');
+  saveTarget = uri('/tmp/out.png');
+  await p.post({ type: 'savePng', slide: 3, data: png });
+  assert.deepEqual(written.at(-1), ['/tmp/out.png', png]);
+  await p.post({ type: 'savePng', slide: 3, data: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9]) });
+  assert.equal(written.length, 1, 'a non-PNG is refused');
+  await p.post({ type: 'pngFailed', message: 'nope' });
+  assert.equal(warnings.at(-1), 'PPTX Viewer: nope');
 });

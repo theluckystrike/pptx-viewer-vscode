@@ -75,8 +75,10 @@ ${footer ? `<style>${FOOTER_CSS}</style>` : ''}
   <span id="searchCount"></span>
   <span class="grow"></span>
   <button id="notesBtn" title="Show or hide speaker notes">Notes</button>
-  <button id="mdBtn" title="Copy this slide's text and notes as Markdown">Copy as Markdown</button>
-  <button id="mdAllBtn" title="Copy all slides as Markdown">Copy all</button>
+  <span id="copyGroup" class="group"><span class="groupLabel">Copy:</span>
+  <button id="mdBtn" title="Copy this slide's text and notes as Markdown">Markdown</button>
+  <button id="pngBtn" title="Copy this slide as a PNG picture. Shift+click saves it as a .png file.">PNG</button>
+  <button id="mdAllBtn" title="Copy all slides as Markdown">All</button></span>
 </div>
 <div id="main">
   <aside id="sidebar">

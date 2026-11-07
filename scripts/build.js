@@ -18,6 +18,10 @@ require('esbuild').buildSync({
 
 const vendor = path.join(root, 'media/vendor');
 fs.mkdirSync(vendor, { recursive: true });
-fs.copyFileSync(path.join(root, 'node_modules/pptx-preview/dist/pptx-preview.umd.js'), path.join(vendor, 'pptx-preview.umd.js'));
-fs.writeFileSync(path.join(vendor, 'VERSION'), require(path.join(root, 'node_modules/pptx-preview/package.json')).version + '\n');
-console.log('built out/extension.js and media/vendor/pptx-preview.umd.js');
+const { patchRenderer, RENDERER_VERSION } = require('./patch-renderer');
+const version = require(path.join(root, 'node_modules/pptx-preview/package.json')).version;
+if (version !== RENDERER_VERSION) throw new Error(`pptx-preview is ${version}; scripts/patch-renderer.js was written for ${RENDERER_VERSION}.`);
+const { src, applied } = patchRenderer(fs.readFileSync(path.join(root, 'node_modules/pptx-preview/dist/pptx-preview.umd.js'), 'utf8'));
+fs.writeFileSync(path.join(vendor, 'pptx-preview.umd.js'), src);
+fs.writeFileSync(path.join(vendor, 'VERSION'), version + ' + ' + applied.join(', ') + '\n');
+console.log('built out/extension.js and media/vendor/pptx-preview.umd.js (' + applied.length + ' renderer patches)');

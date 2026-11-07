@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.0 (2026-11-08)
+
+- Slides look closer to PowerPoint. Body text now takes its size, bullets and spacing from the slide master. Before, bullets in decks made with python-pptx and similar tools were drawn at 18 pt instead of 32 pt, without bullet marks and too low on the slide.
+- Text uses the deck's own fonts, including theme fonts such as Calibri and Aptos. A font that is not installed is replaced by a close match instead of the editor's UI font, and Latin text is no longer squeezed together.
+- A content placeholder that shares a number with the master's date box (the right column of a two-column slide, for example) is no longer drawn grey, small and centred.
+- SmartArt saved by PowerPoint is drawn, and the "cannot draw SmartArt" message shows only for SmartArt saved without a drawn copy.
+- Copy a slide as a PNG picture, or Shift+click to save it as a `.png` file ("PPTX: Copy Slide as PNG Picture", "PPTX: Save Slide as PNG…").
+- Live reload also catches decks saved by other programs, such as a script or an AI agent, within about a second.
+- Slides are drawn when they are first shown, so the first slide of a long deck appears sooner, and one slide that cannot be drawn shows its text with a note instead of stopping the whole deck.
+- An empty file says "This file is empty (0 bytes)". When a file cannot be opened, the slide number box reads "– / –" and the slide buttons, Present, search and copy are greyed out.
+- Decks up to 300 MB open without asking (was 150 MB). A public 197 MB deck shows its first slide in about 5 seconds.
+- "Fit" leaves room for the message above a slide, so the slide no longer gets scroll bars. The copy buttons sit in one "Copy: Markdown, PNG, All" group, and the toolbar stays on one row in a normal window.
+- Shapes with broken outlines no longer fill the developer console with errors.
+- The Marketplace name is now "PPTX Viewer & PPT Viewer, PowerPoint Viewer & Slideshow". The extension ID, settings and commands stay the same.
+
 ## 0.3.0 (2026-11-07)
 
 - Present. The "Present" button (or "PPTX: Present Slides (Full Screen)") shows one slide at a time on a black screen, fitted to the window. Arrow keys, Space, Page Up and Page Down or a click move between slides, and Esc ends it. VS Code goes to Zen Mode (full screen, no side bars) while you present and comes back when you press Esc. Turn that off with `pptxViewer.presentFullScreen`.

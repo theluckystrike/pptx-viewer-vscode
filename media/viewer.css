@@ -82,3 +82,8 @@ mark { background: var(--vscode-editor-findMatchHighlightBackground, #ffe066); c
 #presentStage .presentText h2 { font-size: 4vh; }
 #presentBar { height: 24px; width: 100%; display: flex; justify-content: space-between; padding: 0 12px; box-sizing: border-box; color: #888; font-size: 12px; align-items: center; }
 body.presenting #toolbar, body.presenting #main, body.presenting #zovo-support { visibility: hidden; }
+input:disabled, select:disabled { opacity: .45; cursor: default; }
+body.noDeck #slideCount { opacity: .45; }
+/* The file name is also the tab title. Below 1500 px it gives its room to the buttons, so the toolbar stays on one row. */
+@media (max-width: 1500px) { #fileName, #fileName + .sep { display: none; } }
+.groupLabel { opacity: .75; margin-right: 1px; }

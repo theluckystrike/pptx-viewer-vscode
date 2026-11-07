@@ -1,8 +1,8 @@
 {
   "name": "pptx-slide-viewer",
-  "displayName": "PPTX Viewer & PowerPoint Viewer, PPT Slide Viewer",
-  "description": "PPTX viewer and PowerPoint viewer for .pptx, .ppsx, .potx and old .ppt decks in VS Code. Present full screen, thumbnails, speaker notes, search and copy as Markdown. Offline, no LibreOffice.",
-  "version": "0.3.0",
+  "displayName": "PPTX Viewer & PPT Viewer, PowerPoint Viewer & Slideshow",
+  "description": "PPTX viewer, PPT viewer and PowerPoint slide viewer for .pptx, .ppsx, .potx and old .ppt decks. Present full screen, thumbnails, notes, search, copy a slide as PNG or Markdown. Reloads when a script or AI agent saves the deck. Offline, no LibreOffice.",
+  "version": "0.4.0",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -45,8 +45,8 @@
     "thumbnails",
     "outline",
     "pptx to markdown",
-    "markdown",
-    "search",
+    "slide to png",
+    "live reload",
     "preview",
     "offline"
   ],
@@ -99,6 +99,17 @@
       {
         "command": "pptxViewer.copyDeckMarkdown",
         "title": "Copy All Slides as Markdown",
+        "category": "PPTX"
+      },
+      {
+        "command": "pptxViewer.copySlidePng",
+        "title": "Copy Slide as PNG Picture",
+        "category": "PPTX",
+        "icon": "$(file-media)"
+      },
+      {
+        "command": "pptxViewer.saveSlidePng",
+        "title": "Save Slide as PNG…",
         "category": "PPTX"
       },
       {
@@ -229,6 +240,14 @@
         {
           "command": "pptxViewer.present",
           "when": "activeCustomEditorId == pptxViewer.preview"
+        },
+        {
+          "command": "pptxViewer.copySlidePng",
+          "when": "activeCustomEditorId == pptxViewer.preview"
+        },
+        {
+          "command": "pptxViewer.saveSlidePng",
+          "when": "activeCustomEditorId == pptxViewer.preview"
         }
       ]
     },
@@ -263,7 +282,7 @@
       "properties": {
         "pptxViewer.maxFileSizeMB": {
           "type": "number",
-          "default": 150,
+          "default": 300,
           "minimum": 1,
           "description": "Ask before opening decks larger than this, in MB."
         },

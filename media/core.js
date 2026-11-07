@@ -173,6 +173,8 @@
 
   function normalizeView(v) { return v === 'scroll' ? 'scroll' : 'slide'; }
 
-  return { splitHighlight, countMatches, searchDeck, noticeMessage, fitScale, clampSlide, formatBytes, slideBodyLines, snippet,
+  const UNDRAWABLE_MESSAGE = 'This slide could not be drawn, so its text is shown instead. Open the deck in PowerPoint, Keynote or LibreOffice to see it as designed.';
+
+  return { UNDRAWABLE_MESSAGE, splitHighlight, countMatches, searchDeck, noticeMessage, fitScale, clampSlide, formatBytes, slideBodyLines, snippet,
     normalizeZoom, zoomScale, stepZoom, wheelZoom, zoomLabel, slideAtScroll, normalizeView, ZOOM_MIN, ZOOM_MAX };
 });

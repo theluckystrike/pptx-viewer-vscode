@@ -1,6 +1,6 @@
 # Copy slide text as Markdown
 
-"Copy as Markdown" puts the current slide on the clipboard:
+Copy: "Markdown" in the toolbar puts the current slide on the clipboard:
 
 ```markdown
 ## Summary
@@ -12,4 +12,4 @@
 > **Notes:** Stress the latency win first.
 ```
 
-"Copy all" does the same for the whole deck, with one `##` heading per slide. Tables become Markdown tables.
+Copy: "All" does the same for the whole deck, with one `##` heading per slide. Tables become Markdown tables.

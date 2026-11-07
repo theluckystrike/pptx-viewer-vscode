@@ -5,6 +5,7 @@ const { readXmlParts, resolveTarget, relsPathFor } = require('./ooxml/zip');
 const { parseXml, child, find, findAll, elements, local } = require('./ooxml/xml');
 
 const REL_NOTES = /\/notesSlide$/;
+const REL_DIAGRAM_DRAWING = /\/diagramDrawing$/;
 const SKIP_PH = new Set(['sldNum', 'dt', 'ftr', 'hdr', 'sldImg']);
 const TITLE_PH = new Set(['title', 'ctrTitle']);
 const EMU_PER_PX = 9525; // 914400 EMU per inch / 96 px per inch
@@ -78,7 +79,7 @@ function walkShapes(tree, slide) {
       const uri = gd ? gd.attrs.uri || '' : '';
       const tbl = gd && find(gd, 'a:tbl');
       if (tbl) slide.blocks.push({ kind: 'table', rows: tableRows(tbl) });
-      else if (/\/diagram$/.test(uri)) addNotice(slide, 'smartart');
+      else if (/\/diagram$/.test(uri)) slide.diagrams = (slide.diagrams || 0) + 1;
       else if (/\/chart$/.test(uri) || /chartex/i.test(uri)) addNotice(slide, 'chart');
       else if (/\/ole$/.test(uri)) addNotice(slide, 'object');
     } else if (n === 'p:pic') {
@@ -159,6 +160,11 @@ function parseDeck(bytes) {
     const tree = find(doc, 'p:spTree');
     if (tree) walkShapes(tree, slide);
     const srels = parseRels(parts.get(relsPathFor(part)));
+    // PowerPoint saves a drawn copy of each SmartArt (ppt/diagrams/drawingN.xml). The renderer draws
+    // that copy, so only SmartArt without one (some other apps' files) gets the "cannot draw" notice.
+    const drawings = [...srels.values()].filter((r) => REL_DIAGRAM_DRAWING.test(r.type) && !r.external && parts.has(resolveTarget(part, r.target))).length;
+    if (slide.diagrams > drawings) addNotice(slide, 'smartart');
+    delete slide.diagrams;
     for (const r of srels.values()) {
       if (REL_NOTES.test(r.type) && !r.external) {
         const nx = parts.get(resolveTarget(part, r.target));
