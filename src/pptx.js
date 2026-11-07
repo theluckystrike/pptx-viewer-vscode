@@ -185,6 +185,7 @@ function parseDeck(bytes) {
     widthPx: Math.round(width / EMU_PER_PX),
     heightPx: Math.round(height / EMU_PER_PX),
     slides,
+    xmlStats: parts.xmlStats || { maxPart: 0, total: 0 },
   };
 }
 

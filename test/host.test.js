@@ -258,3 +258,24 @@ test('Save Slide as PNG: asks where (next to the deck), writes the bytes; a fail
   await p.post({ type: 'pngFailed', message: 'nope' });
   assert.equal(warnings.at(-1), 'PPTX Viewer: nope');
 });
+
+// VER6: a small deck whose slide XML unpacks to more than the draw limit is shown as text only.
+// Before, the webview renderer unpacked a 240 MB slide part and grew past 10 GB of memory.
+test('readDeck: slide XML over the draw limit gives a text-only deck (zip bomb)', () => {
+  const { unzipSync, zipSync, strToU8, strFromU8 } = require('fflate');
+  const src = fs.readFileSync(path.join(__dirname, 'fixtures', 'quarterly-review.pptx'));
+  const files = unzipSync(new Uint8Array(src));
+  const name = Object.keys(files).find((n) => /^ppt\/slides\/slide1\.xml$/.test(n));
+  const xml = strFromU8(files[name]);
+  files[name] = strToU8(xml.replace('</p:spTree>', '<!--' + ' '.repeat(20 * 1024 * 1024) + '--></p:spTree>'));
+  const bomb = zipSync(files, { level: 9 });
+  assert.ok(bomb.length < 2 * 1024 * 1024, 'the test deck is small on disk');
+  const big = ext.readDeck(bomb, 'bomb.pptx');
+  assert.equal(big.drawable, false);
+  assert.match(big.deck.textOnly, /too much to draw safely/);
+  assert.ok(big.deck.slides.length > 0, 'text is still read');
+  const ok = ext.readDeck(new Uint8Array(src), 'quarterly-review.pptx');
+  assert.equal(ok.drawable, true);
+  assert.equal(ok.deck.textOnly, undefined);
+  assert.ok(ok.deck.xmlStats.maxPart > 0 && ok.deck.xmlStats.maxPart < 1024 * 1024);
+});

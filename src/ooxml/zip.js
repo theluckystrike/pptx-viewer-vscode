@@ -16,11 +16,13 @@ function isZip(bytes) {
 function readXmlParts(bytes) {
   if (!isZip(bytes)) throw new PackageError('This file is not a ZIP package. It may be an old binary .ppt file or damaged.');
   let total = 0;
+  let maxPart = 0;
   let files;
   try {
     files = unzipSync(bytes, {
       filter(f) {
         if (!/\.(xml|rels)$/i.test(f.name)) return false;
+        maxPart = Math.max(maxPart, f.originalSize);
         if (f.originalSize > MAX_PART_BYTES) return false;
         total += f.originalSize;
         if (total > MAX_TOTAL_BYTES) throw new PackageError('The XML inside this file is larger than 256 MB. It was not opened.');
@@ -32,10 +34,15 @@ function readXmlParts(bytes) {
     throw new PackageError('The file could not be unzipped: ' + (e && e.message ? e.message : String(e)));
   }
   const parts = new Map();
+  let inflated = 0;
   for (const [name, data] of Object.entries(files)) {
+    maxPart = Math.max(maxPart, data.length);
+    inflated += data.length;
     if (data.length > MAX_PART_BYTES) continue; // header lied about the size
     parts.set(name.replace(/^\/+/, ''), strFromU8(data));
   }
+  // Unpacked XML sizes (largest part, all parts), so a caller can refuse to hand a zip bomb to a renderer.
+  parts.xmlStats = { maxPart, total: Math.max(total, inflated) };
   return parts;
 }
 

@@ -10,6 +10,7 @@
 - Live reload also catches decks saved by other programs, such as a script or an AI agent, within about a second.
 - Slides are drawn when they are first shown, so the first slide of a long deck appears sooner, and one slide that cannot be drawn shows its text with a note instead of stopping the whole deck.
 - An empty file says "This file is empty (0 bytes)". When a file cannot be opened, the slide number box reads "– / –" and the slide buttons, Present, search and copy are greyed out.
+- A deck whose slide XML is larger than 16 MB when unpacked (in all, 96 MB) is shown as text only, with a note. Before, a 1 MB file built this way made the slide renderer use more than 10 GB of memory. Real decks have far less XML than this (under 3 MB in all in our tests).
 - Decks up to 300 MB open without asking (was 150 MB). A public 197 MB deck shows its first slide in about 5 seconds.
 - "Fit" leaves room for the message above a slide, so the slide no longer gets scroll bars. The copy buttons sit in one "Copy: Markdown, PNG, All" group, and the toolbar stays on one row in a normal window.
 - Shapes with broken outlines no longer fill the developer console with errors.

@@ -17,6 +17,10 @@ const PREFS_KEY = 'pptxViewer.viewPrefs';
 const PREFS_MAX = 200;
 const WEBVIEW_COMMANDS = ['find', 'toggleNotes', 'zoomIn', 'zoomOut', 'zoomFit', 'zoomWidth', 'zoomActual', 'toggleScrollView', 'present', 'copySlidePng', 'saveSlidePng'];
 const LEGACY_EXT = /\.(ppt|pps|pot)$/i;
+// The slide renderer in the webview unpacks the XML again and needs about 40x its size in memory.
+// A deck over these limits is shown as text only (real decks: largest part well under 1 MB).
+const DRAW_MAX_PART_BYTES = 16 * 1024 * 1024;
+const DRAW_MAX_TOTAL_BYTES = 96 * 1024 * 1024;
 const EMPTY_FILE_MESSAGE = 'This file is empty (0 bytes). It has no slides. If it is still being written or downloaded, it opens by itself when it is done.';
 
 /**
@@ -28,7 +32,14 @@ function readDeck(data, fileName) {
   const kind = sniffPpt(data);
   if (kind === 'ole') return { deck: parsePpt(data), drawable: false };
   if (kind === 'other' && LEGACY_EXT.test(fileName)) throw new Error('This file has a PowerPoint name, but it is neither a PowerPoint 97-2003 file nor a .pptx deck.');
-  return { deck: parseDeck(data), drawable: true };
+  const deck = parseDeck(data);
+  const st = deck.xmlStats || { maxPart: 0, total: 0 };
+  if (st.maxPart > DRAW_MAX_PART_BYTES || st.total > DRAW_MAX_TOTAL_BYTES) {
+    const mb = Math.round(Math.max(st.maxPart, st.total) / (1024 * 1024));
+    deck.textOnly = `This deck has ${mb} MB of slide XML when unpacked, which is too much to draw safely. Text, notes and search still work. Open it in PowerPoint, Keynote or LibreOffice to see the slides.`;
+    return { deck, drawable: false };
+  }
+  return { deck, drawable: true };
 }
 
 /** Calls onChange when a local file's size or mtime changes (1 s stat poll). Returns a disposable. */

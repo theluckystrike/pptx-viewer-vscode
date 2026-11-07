@@ -123,7 +123,8 @@
     setDeckControls(true);
     buildThumbs();
     buildOutline();
-    status(state.config.renderSlides && !deck.legacy ? `Drawing ${n} slides…` : '');
+    status(state.config.renderSlides && !deck.legacy && !deck.textOnly ? `Drawing ${n} slides…` : '');
+    if (deck.textOnly) note(String(deck.textOnly));
     if (deck.hasMacros) note('This deck contains macros. They are never run.');
     if (deck.legacy) {
       // Old binary file: text only. Say so up front, with a way out to PowerPoint or Keynote.
