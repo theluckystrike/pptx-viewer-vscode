@@ -14,7 +14,7 @@
 
   const state = {
     deck: null, fileName: '', current: 1, query: '', hits: [], hitPos: -1,
-    drawn: null, drawError: '', config: { showNotes: true, renderSlides: true }, notes: true,
+    drawn: null, drawError: '', config: { showNotes: true, renderSlides: true }, notes: true, presenting: false,
     view: 'slide', zoom: 'fit', scale: 1,
   };
   const saved = vscode.getState();
@@ -62,12 +62,19 @@
       else if (m.name === 'zoomWidth') setZoom('width');
       else if (m.name === 'zoomActual') setZoom(1);
       else if (m.name === 'toggleScrollView') setView(state.view === 'scroll' ? 'slide' : 'scroll');
+      else if (m.name === 'present') setPresent(!state.presenting);
     }
   });
 
+  function openExternalButton() {
+    const b = el('button', null, 'Open in Default App');
+    b.addEventListener('click', () => vscode.postMessage({ type: 'openInDefaultApp' }));
+    return b;
+  }
+
   function showError(text) {
     const box = $('notice');
-    box.replaceChildren(el('strong', null, 'Cannot open this file. '), document.createTextNode(text));
+    box.replaceChildren(el('strong', null, 'Cannot open this file. '), document.createTextNode(text + ' '), openExternalButton());
     box.hidden = false;
     box.className = 'error';
   }
@@ -92,8 +99,14 @@
     if (!n) { status(''); showError('The deck has no slides.'); return; }
     buildThumbs();
     buildOutline();
-    status(state.config.renderSlides ? `Drawing ${n} slides…` : '');
+    status(state.config.renderSlides && !deck.legacy ? `Drawing ${n} slides…` : '');
     if (deck.hasMacros) note('This deck contains macros. They are never run.');
+    if (deck.legacy) {
+      // Old binary file: text only. Say so up front, with a way out to PowerPoint or Keynote.
+      const s = $('status');
+      s.replaceChildren(document.createTextNode('Old PowerPoint 97-2003 file. Text only: titles, slide text and speaker notes. Pictures, shapes and layout are not shown. '), openExternalButton());
+      s.hidden = false;
+    }
     go(state.current, true);
   }
 
@@ -128,6 +141,7 @@
     }
     refreshThumbs();
     renderStage();
+    renderPresent();
   }
 
   function slideClone(i, scale) {
@@ -517,7 +531,42 @@
     if (e.key === 'Enter') { e.preventDefault(); clearTimeout(searchTimer); if (state.query !== $('searchInput').value.trim()) runSearch(); nextHit(e.shiftKey ? -1 : 1); }
     else if (e.key === 'Escape') { $('searchInput').value = ''; runSearch(); setTab('slides'); }
   });
+  // ---- Present: one slide at a time on black, fitted to the whole window ----
+  function setPresent(on) {
+    if (!state.deck || !state.deck.slides.length) return;
+    if (on === state.presenting) return;
+    state.presenting = on;
+    $('present').hidden = !on;
+    document.body.classList.toggle('presenting', on);
+    vscode.postMessage({ type: 'present', on });
+    if (on) { $('present').focus(); setTimeout(renderPresent, 60); setTimeout(renderPresent, 400); }
+    else renderStage();
+  }
+
+  function renderPresent() {
+    if (!state.presenting) return;
+    const deck = state.deck;
+    const box = $('presentStage');
+    const fit = C.zoomScale('fit', Math.max(80, window.innerWidth - 8), Math.max(80, window.innerHeight - 28), deck.widthPx, deck.heightPx);
+    const clone = slideClone(state.current, fit);
+    if (clone) box.replaceChildren(clone);
+    else { const t = textSlide(deck.slides[state.current - 1]); t.classList.add('presentText'); box.replaceChildren(t); }
+    $('presentCount').textContent = `${state.current} / ${deck.slides.length}`;
+  }
+
+  $('presentBtn').addEventListener('click', () => setPresent(true));
+  $('present').addEventListener('click', (e) => { if (e.target.closest && e.target.closest('#presentBar')) return; go(state.current + (e.shiftKey ? -1 : 1)); renderPresent(); });
+
   document.addEventListener('keydown', (e) => {
+    if (state.presenting) {
+      e.preventDefault();
+      if (e.key === 'Escape') setPresent(false);
+      else if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter', 'n'].includes(e.key)) { go(state.current + 1); renderPresent(); }
+      else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace', 'p'].includes(e.key)) { go(state.current - 1); renderPresent(); }
+      else if (e.key === 'Home') { go(1); renderPresent(); }
+      else if (e.key === 'End') { go(state.deck.slides.length); renderPresent(); }
+      return;
+    }
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
     if (!e.ctrlKey && !e.metaKey && !e.altKey) {
       if (e.key === '+' || e.key === '=') { e.preventDefault(); zoomStep(1); return; }
@@ -532,7 +581,7 @@
   // Links inside drawn slides must not navigate the webview.
   document.addEventListener('click', (e) => { const a = e.target.closest && e.target.closest('#stage a, #thumbs a'); if (a) e.preventDefault(); }, true);
   let resizeTimer = null;
-  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(renderStage, 100); });
+  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (state.presenting) renderPresent(); else renderStage(); }, 100); });
 
   vscode.postMessage({ type: 'ready' });
 })();

@@ -1,6 +1,6 @@
-# PPTX Viewer & PowerPoint Viewer
+# PPTX Viewer & PowerPoint Viewer, PPT Slide Viewer
 
-For developers who get slide decks in a repo or a pull request, PPTX Viewer is a PowerPoint viewer that opens your decks in VS Code with thumbnails, speaker notes and search.
+For developers who get slide decks in a repo or a pull request, PPTX Viewer is a PowerPoint viewer that opens your decks in VS Code with thumbnails, speaker notes and search, presents them full screen, and reads old `.ppt` files too. No LibreOffice, no upload.
 
 <p><a href="https://marketplace.visualstudio.com/items?itemName=zovo.pptx-slide-viewer"><img src="https://img.shields.io/visual-studio-marketplace/v/zovo.pptx-slide-viewer" alt="Version"></a> <a href="https://marketplace.visualstudio.com/items?itemName=zovo.pptx-slide-viewer"><img src="https://img.shields.io/visual-studio-marketplace/i/zovo.pptx-slide-viewer" alt="Installs"></a> <a href="https://open-vsx.org/extension/zovo/pptx-slide-viewer"><img src="https://img.shields.io/open-vsx/v/zovo/pptx-slide-viewer" alt="Open VSX"></a></p>
 
@@ -8,6 +8,8 @@ For developers who get slide decks in a repo or a pull request, PPTX Viewer is a
 
 *A real VS Code 1.142 window running this extension on [`test/fixtures/quarterly-review.pptx`](test/fixtures/quarterly-review.pptx), made by [`scripts/make-samples.py`](scripts/make-samples.py).*
 
+- Present right from VS Code: one slide at a time on a black screen, full screen, with the arrow keys or a click. Esc brings your editor back.
+- Old PowerPoint 97-2003 `.ppt` files open too, as text with titles, slide text and speaker notes. Search and Copy as Markdown work on them.
 - See each slide with thumbnails and its speaker notes. Zoom in on small print, or scroll through the whole deck like a document.
 - Search titles, bullets, table cells and notes across the whole deck, then jump to the slide.
 - Copy one slide or the whole deck as clean Markdown for a README, an issue or a chat with an AI assistant.
@@ -15,13 +17,25 @@ For developers who get slide decks in a repo or a pull request, PPTX Viewer is a
 ## Quick start
 
 1. Install the extension.
-2. Click any `.pptx`, `.ppsx`, `.potx` or `.pptm` file in the Explorer. Press `Ctrl+F` (`Cmd+F` on macOS) to search.
+2. Click any `.pptx`, `.ppsx`, `.potx`, `.pptm` or `.ppt` file in the Explorer. Press `Ctrl+F` (`Cmd+F` on macOS) to search.
 
 ![A click on the .pptx file opens slide 1. Clicks on the thumbnails move to slides 2, 3 and 4, and a search for latency lists the matching slides in the Outline tab](https://raw.githubusercontent.com/theluckystrike/pptx-viewer-vscode/main/images/demo-pptx.gif)
 
 *Recorded in the same window. The white arrow is drawn in to show where each click lands.*
 
 Run "Get Started with PPTX Slide Viewer" from the Welcome page for a short tour.
+
+## Present
+
+Click "Present" in the toolbar, or run "PPTX: Present Slides (Full Screen)". The current slide fills the screen on black. `→`, `↓`, `Space`, `Page Down`, `Enter` or a click go to the next slide; `←`, `↑`, `Page Up` or `Backspace` go back; `Home` and `End` jump to the first and last slide. `Esc` ends it. VS Code switches to Zen Mode (full screen, no side bars) while you present and switches back on `Esc`. Set `pptxViewer.presentFullScreen` to `false` to present inside the editor tab only.
+
+<img src="https://raw.githubusercontent.com/theluckystrike/pptx-viewer-vscode/main/images/vscode-present.png" alt="Present mode in VS Code: slide 4 of 6 fills the screen on black, with the slide number at the bottom" width="100%">
+
+## Old .ppt files (PowerPoint 97-2003)
+
+`.ppt`, `.pps` and `.pot` files open as text: each slide's title, its text and text boxes, and its speaker notes, in slide order. The outline, search, the notes pane and Copy as Markdown work as they do for `.pptx`. A line at the top says the file is text only, because pictures, shapes and layout are not read, and its "Open in Default App" button opens the file in PowerPoint or Keynote. The file is read by the extension itself, so nothing else needs to be installed. A `.pptx` deck that was saved with a `.ppt` name is spotted by its first bytes and drawn as a normal deck. Password-protected and damaged files get a message, never an empty page.
+
+<img src="https://raw.githubusercontent.com/theluckystrike/pptx-viewer-vscode/main/images/vscode-ppt.png" alt="An old .ppt deck open in VS Code as text, with the slide title, its lines and the speaker notes, and a line at the top saying it is a PowerPoint 97-2003 file shown as text" width="100%">
 
 ## Search slides and notes
 
@@ -73,6 +87,7 @@ SmartArt, video, audio, ink and embedded objects are not drawn. A slide that has
 | `pptxViewer.renderSlides` | `true` | Draw the slides. Set to `false` to see only the outline, notes and search |
 | `pptxViewer.defaultView` | `slide` | How a deck opens the first time. `slide` shows one slide at a time and `scroll` puts all slides in one column |
 | `pptxViewer.defaultZoom` | `fit` | Zoom a deck opens with the first time, `fit` or `width` |
+| `pptxViewer.presentFullScreen` | `true` | Present switches VS Code to Zen Mode (full screen) and back on Esc. `false` presents inside the editor tab |
 | `pptxViewer.askForRating` | `true` | Ask one time for a Marketplace rating, after 5 files and 2 days. Turn it off with `false` |
 
 ## Large decks
@@ -85,8 +100,8 @@ Everything runs on your machine. The extension makes no network calls and has no
 
 ## Known limits
 
-- It is a viewer. It doesn't edit, present full screen or export to PDF.
-- Old binary `.ppt` files (PowerPoint 97 to 2003) are not supported. Save them as `.pptx` first.
+- It is a viewer. It doesn't edit or export to PDF. Present mode has no presenter view or timer.
+- Old binary `.ppt` files (PowerPoint 97 to 2003) show text only: no pictures, shapes, tables or layout. Bullet levels show flat.
 - Fonts that are not installed on your machine are replaced, so line breaks can differ from PowerPoint.
 - Table styles from the theme are not always drawn. The table text is always correct.
 - Zoom changes the drawn slides. The text view, shown while slides are drawn or when drawing is off, keeps its normal size.

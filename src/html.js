@@ -69,6 +69,7 @@ ${footer ? `<style>${FOOTER_CSS}</style>` : ''}
     <button id="zoomInBtn" title="Zoom in (+)" aria-label="Zoom in">+</button>
   </span>
   <button id="scrollBtn" title="Scroll view: all slides in one column" aria-pressed="false">Scroll</button>
+  <button id="presentBtn" title="Present: one slide at a time on a black screen, full screen. Arrows or a click move, Esc ends it." aria-label="Present">&#9654; Present</button>
   <span class="sep"></span>
   <input id="searchInput" type="search" placeholder="Search slides and notes" aria-label="Search slides and notes">
   <span id="searchCount"></span>
@@ -92,6 +93,10 @@ ${footer ? `<style>${FOOTER_CSS}</style>` : ''}
     <div id="stage"></div>
     <div id="notes" aria-label="Speaker notes"></div>
   </section>
+</div>
+<div id="present" hidden tabindex="-1" role="dialog" aria-label="Presenting">
+  <div id="presentStage"></div>
+  <div id="presentBar"><span id="presentCount"></span><span id="presentHint">&#8592; &#8594; to move, Esc to end</span></div>
 </div>
 <div id="renderHost" aria-hidden="true"></div>
 ${footer}

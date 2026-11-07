@@ -11,6 +11,8 @@ const FIX = path.join(__dirname, 'fixtures');
 const settings = {};
 let clipboard = '';
 const commands = new Map();
+const executed = [];
+const opened = [];
 const uri = (p) => ({ path: p, fsPath: p, toString: () => 'file://' + p });
 const vscodeStub = {
   Uri: { joinPath: (u, ...p) => uri(path.posix.join(u.path, ...p)), parse: (s) => uri(s) },
@@ -26,8 +28,8 @@ const vscodeStub = {
     setStatusBarMessage: () => ({ dispose() {} }),
     showOpenDialog: async () => undefined,
   },
-  env: { clipboard: { writeText: async (t) => { clipboard = t; } } },
-  commands: { registerCommand: (id, fn) => { commands.set(id, fn); return { dispose() {} }; }, executeCommand: async () => {} },
+  env: { clipboard: { writeText: async (t) => { clipboard = t; } }, openExternal: async (u) => { opened.push(u.path); return true; } },
+  commands: { registerCommand: (id, fn) => { commands.set(id, fn); return { dispose() {} }; }, executeCommand: async (id) => { executed.push(id); } },
 };
 const origLoad = Module._load;
 Module._load = function (req, ...rest) { return req === 'vscode' ? vscodeStub : origLoad.call(this, req, ...rest); };
@@ -151,4 +153,56 @@ test('support: the footer shows by default and pptxViewer.showSupportLinks=false
       assert.deepEqual(p.panel.webview.options.enableCommandUris, ['pptxViewer.supportDeveloper', 'pptxViewer.moreViewers', 'workbench.action.openSettings']);
     } finally { delete settings.showSupportLinks; }
   }
+});
+
+test('an old .ppt opens as text: deck with legacy flag, no bytes to draw', async () => {
+  const { provider } = ext.activate({ subscriptions: [], extensionUri: uri('/ext') });
+  const p = openPanel(provider, 'legacy-basic.ppt');
+  await p.post({ type: 'ready' });
+  await wait();
+  const deck = p.sent.find((m) => m.type === 'deck');
+  assert.ok(deck, 'deck sent');
+  assert.equal(deck.deck.legacy, true);
+  assert.equal(deck.deck.slides.length, 2);
+  assert.equal(p.sent.some((m) => m.type === 'bytes'), false);
+  assert.equal(p.sent.some((m) => m.type === 'error'), false);
+});
+
+test('a .pptx saved with a .ppt name is drawn as a normal deck', async () => {
+  const { provider } = ext.activate({ subscriptions: [], extensionUri: uri('/ext') });
+  const p = openPanel(provider, 'renamed-pptx.ppt');
+  await p.post({ type: 'ready' });
+  await wait();
+  const deck = p.sent.find((m) => m.type === 'deck');
+  assert.equal(deck.deck.legacy, undefined);
+  assert.ok(p.sent.some((m) => m.type === 'bytes'));
+});
+
+test('a broken .ppt gives a message, and Open in Default App opens only this file', async () => {
+  const { provider } = ext.activate({ subscriptions: [], extensionUri: uri('/ext') });
+  const p = openPanel(provider, 'legacy-broken.ppt');
+  await p.post({ type: 'ready' });
+  await wait();
+  const err = p.sent.find((m) => m.type === 'error');
+  assert.ok(err && /damaged|cannot be read/.test(err.message), JSON.stringify(err));
+  await p.post({ type: 'openInDefaultApp', url: 'https://example.com' });
+  assert.equal(opened[opened.length - 1], path.join(FIX, 'legacy-broken.ppt'));
+});
+
+test('Present toggles Zen Mode on and off once, and not at all when the setting is off', async () => {
+  const { provider } = ext.activate({ subscriptions: [], extensionUri: uri('/ext') });
+  const p = openPanel(provider, 'quarterly-review.pptx');
+  await p.post({ type: 'ready' });
+  await wait();
+  executed.length = 0;
+  await p.post({ type: 'present', on: true });
+  await p.post({ type: 'present', on: true });
+  await p.post({ type: 'present', on: false });
+  assert.deepEqual(executed, ['workbench.action.toggleZenMode', 'workbench.action.toggleZenMode']);
+  settings.presentFullScreen = false;
+  executed.length = 0;
+  await p.post({ type: 'present', on: true });
+  assert.deepEqual(executed, []);
+  delete settings.presentFullScreen;
+  assert.ok(commands.has('pptxViewer.present'));
 });

@@ -1,8 +1,8 @@
 {
   "name": "pptx-slide-viewer",
-  "displayName": "PPTX Viewer & PowerPoint Viewer",
-  "description": "PPTX viewer for PowerPoint decks (.pptx, .ppsx, .potx) in VS Code with slides, thumbnails, speaker notes, search and copy as Markdown, all offline.",
-  "version": "0.2.4",
+  "displayName": "PPTX Viewer & PowerPoint Viewer, PPT Slide Viewer",
+  "description": "PPTX viewer and PowerPoint viewer for .pptx, .ppsx, .potx and old .ppt decks in VS Code. Present full screen, thumbnails, speaker notes, search and copy as Markdown. Offline, no LibreOffice.",
+  "version": "0.3.0",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -19,34 +19,34 @@
     "Other"
   ],
   "keywords": [
+    "pptx viewer",
+    "powerpoint viewer",
     "slide viewer",
+    "ppt viewer",
     "pptx preview",
     "powerpoint preview",
-    "powerpoint viewer",
-    "pptx viewer",
     "pptx",
     "powerpoint",
     "ppt",
     "slides",
-    "slide",
     "presentation",
     "presentation viewer",
+    "present",
+    "slideshow",
     "slide deck",
-    "deck",
     "ppsx",
     "potx",
     "pptm",
+    "pps",
+    "powerpoint 97",
     "office viewer",
-    "office",
     "microsoft office",
-    "openxml",
     "speaker notes",
-    "outline",
     "thumbnails",
+    "outline",
     "pptx to markdown",
     "markdown",
     "search",
-    "document viewer",
     "preview",
     "offline"
   ],
@@ -75,6 +75,15 @@
           },
           {
             "filenamePattern": "*.pptm"
+          },
+          {
+            "filenamePattern": "*.ppt"
+          },
+          {
+            "filenamePattern": "*.pps"
+          },
+          {
+            "filenamePattern": "*.pot"
           }
         ],
         "priority": "default"
@@ -148,6 +157,12 @@
         "command": "pptxViewer.moreViewers",
         "title": "More free viewers",
         "category": "PPTX"
+      },
+      {
+        "command": "pptxViewer.present",
+        "title": "Present Slides (Full Screen)",
+        "category": "PPTX",
+        "icon": "$(play)"
       }
     ],
     "menus": {
@@ -156,12 +171,17 @@
           "command": "pptxViewer.copySlideMarkdown",
           "when": "activeCustomEditorId == pptxViewer.preview",
           "group": "navigation"
+        },
+        {
+          "command": "pptxViewer.present",
+          "when": "activeCustomEditorId == pptxViewer.preview",
+          "group": "navigation"
         }
       ],
       "explorer/context": [
         {
           "command": "pptxViewer.openWith",
-          "when": "resourceExtname =~ /^\\.(pptx|ppsx|potx|pptm)$/i",
+          "when": "resourceExtname =~ /^\\.(pptx|ppsx|potx|pptm|ppt|pps|pot)$/i",
           "group": "navigation@99"
         }
       ],
@@ -204,6 +224,10 @@
         },
         {
           "command": "pptxViewer.toggleScrollView",
+          "when": "activeCustomEditorId == pptxViewer.preview"
+        },
+        {
+          "command": "pptxViewer.present",
           "when": "activeCustomEditorId == pptxViewer.preview"
         }
       ]
@@ -288,6 +312,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show the small Sponsor and More free viewers links at the bottom of the viewer. The change shows in files you open next. Nothing is sent anywhere."
+        },
+        "pptxViewer.presentFullScreen": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Present switches VS Code to Zen Mode (full screen, no side bars) and back when you press Esc. Set to `false` to present inside the editor only."
         }
       }
     },

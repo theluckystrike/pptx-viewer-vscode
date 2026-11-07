@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 (2026-11-07)
+
+- Present. The "Present" button (or "PPTX: Present Slides (Full Screen)") shows one slide at a time on a black screen, fitted to the window. Arrow keys, Space, Page Up and Page Down or a click move between slides, and Esc ends it. VS Code goes to Zen Mode (full screen, no side bars) while you present and comes back when you press Esc. Turn that off with `pptxViewer.presentFullScreen`.
+- Old PowerPoint 97-2003 files (`.ppt`, `.pps`, `.pot`) open as text: slide titles, slide text, text boxes and speaker notes, in slide order, with search, the outline and Copy as Markdown. A line at the top says that pictures, shapes and layout are not shown. No LibreOffice or other app is needed.
+- A `.pptx` deck saved with a `.ppt` name opens as a normal deck. A file that is damaged, protected with a password, or not PowerPoint at all shows a message with an "Open in Default App" button instead of an empty page.
+
 ## 0.2.4 (2026-11-07)
 
 - "More free viewers" now starts with the Zovo extensions most related to this one. Picking one opens its Marketplace page, where you choose to install it.

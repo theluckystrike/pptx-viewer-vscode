@@ -22,7 +22,10 @@ function parseWebviewMessage(raw) {
     case 'ready':
     case 'loadAnyway':
     case 'copyDeckMarkdown':
+    case 'openInDefaultApp':
       return { type: raw.type };
+    case 'present':
+      return typeof raw.on === 'boolean' ? { type: 'present', on: raw.on } : null;
     case 'copySlideMarkdown': {
       const slide = int(raw.slide, 1, MAX_SLIDE);
       return slide ? { type: raw.type, slide } : null;
@@ -56,6 +59,7 @@ function readConfig(get) {
     renderSlides: get('renderSlides', true) !== false,
     defaultView: get('defaultView', 'slide') === 'scroll' ? 'scroll' : 'slide',
     defaultZoom: get('defaultZoom', 'fit') === 'width' ? 'width' : 'fit',
+    presentFullScreen: get('presentFullScreen', true) !== false,
   };
 }
 

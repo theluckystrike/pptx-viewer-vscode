@@ -72,3 +72,13 @@ mark { background: var(--vscode-editor-findMatchHighlightBackground, #ffe066); c
 .notesLabel { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; opacity: .65; margin-bottom: 2px; }
 #renderHost { position: fixed; left: -100000px; top: 0; width: 4000px; pointer-events: none; }
 #renderHost .pptx-preview-wrapper { height: auto !important; overflow: visible !important; }
+
+/* Present mode */
+#present { position: fixed; inset: 0; z-index: 50; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; outline: none; }
+#present[hidden] { display: none; }
+#presentStage { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; overflow: hidden; }
+#presentStage .slideFrame { box-shadow: none; }
+#presentStage .presentText { background: #fff; color: #111; max-width: 80vw; max-height: 85vh; overflow: auto; padding: 4vh 4vw; font-size: 2.2vh; border-radius: 4px; }
+#presentStage .presentText h2 { font-size: 4vh; }
+#presentBar { height: 24px; width: 100%; display: flex; justify-content: space-between; padding: 0 12px; box-sizing: border-box; color: #888; font-size: 12px; align-items: center; }
+body.presenting #toolbar, body.presenting #main, body.presenting #zovo-support { visibility: hidden; }

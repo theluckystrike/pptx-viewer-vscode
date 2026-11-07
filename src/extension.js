@@ -4,6 +4,7 @@ const path = require('path');
 const { buildHtml } = require('./html');
 const { parseWebviewMessage, readConfig } = require('./protocol');
 const { parseDeck, slideToMarkdown, deckToMarkdown } = require('./pptx');
+const { parsePpt, sniffPpt } = require('./ppt');
 const { createRatingPrompt } = require('./rate');
 const { registerSupport, commandUris, showLinks } = require('./support');
 
@@ -13,7 +14,19 @@ const VIEW_TYPE = 'pptxViewer.preview';
 const CONFIG = 'pptxViewer';
 const PREFS_KEY = 'pptxViewer.viewPrefs';
 const PREFS_MAX = 200;
-const WEBVIEW_COMMANDS = ['find', 'toggleNotes', 'zoomIn', 'zoomOut', 'zoomFit', 'zoomWidth', 'zoomActual', 'toggleScrollView'];
+const WEBVIEW_COMMANDS = ['find', 'toggleNotes', 'zoomIn', 'zoomOut', 'zoomFit', 'zoomWidth', 'zoomActual', 'toggleScrollView', 'present'];
+const LEGACY_EXT = /\.(ppt|pps|pot)$/i;
+
+/**
+ * Deck text and whether the slides can be drawn. Old .ppt files (and a .pptx saved with a .ppt name)
+ * are told apart by their first bytes, not by the name.
+ */
+function readDeck(data, fileName) {
+  const kind = sniffPpt(data);
+  if (kind === 'ole') return { deck: parsePpt(data), drawable: false };
+  if (kind === 'other' && LEGACY_EXT.test(fileName)) throw new Error('This file has a PowerPoint name, but it is neither a PowerPoint 97-2003 file nor a .pptx deck.');
+  return { deck: parseDeck(data), drawable: true };
+}
 
 // Node Buffers are serialised to JSON by postMessage; a plain Uint8Array is sent as bytes.
 function toPlainBytes(data) {
@@ -88,10 +101,11 @@ class PptxEditorProvider {
         const data = await vscode.workspace.fs.readFile(document.uri);
         if (disposed) return;
         // Text first: the outline, notes and search work before any slide is drawn.
-        entry.deck = parseDeck(data);
+        const { deck, drawable } = readDeck(data, fileName);
+        entry.deck = deck;
         send({ type: 'deck', deck: entry.deck, fileName });
         if (!entry.counted) { entry.counted = true; rating.success(); }
-        if (cfg.renderSlides) send({ type: 'bytes', data: toPlainBytes(data) });
+        if (cfg.renderSlides && drawable) send({ type: 'bytes', data: toPlainBytes(data) });
       } catch (e) {
         send({ type: 'error', message: e && e.message ? e.message : String(e) });
       }
@@ -104,6 +118,10 @@ class PptxEditorProvider {
         entry.ready = true;
         send({ type: 'init', config: this.config(), fileName, prefs: this.getPrefs(document.uri) });
         load();
+      } else if (m.type === 'openInDefaultApp') {
+        await vscode.env.openExternal(document.uri);
+      } else if (m.type === 'present') {
+        await this.present(entry, m.on);
       } else if (m.type === 'loadAnyway') {
         entry.forceLoad = true;
         load();
@@ -135,6 +153,7 @@ class PptxEditorProvider {
     }));
     panel.onDidDispose(() => {
       disposed = true;
+      if (entry.zen) { entry.zen = false; vscode.commands.executeCommand('workbench.action.toggleZenMode').then(undefined, () => {}); }
       clearTimeout(timer);
       if (this.active === entry) this.active = null;
       disposables.forEach((d) => d.dispose());
@@ -153,6 +172,13 @@ class PptxEditorProvider {
     if (!entry || !entry.deck) return;
     await vscode.env.clipboard.writeText(deckToMarkdown(entry.deck, path.posix.basename(entry.uri.path)));
     vscode.window.setStatusBarMessage(`$(markdown) ${entry.deck.slides.length} slides copied as Markdown`, 3000);
+  }
+
+  /** Present mode: the webview shows one slide on black; VS Code goes to Zen Mode (full screen) while it lasts. */
+  async present(entry, on) {
+    if (!this.config().presentFullScreen || !!entry.zen === on) return;
+    entry.zen = on;
+    try { await vscode.commands.executeCommand('workbench.action.toggleZenMode'); } catch { entry.zen = false; }
   }
 
   sendCommand(name) {
@@ -174,7 +200,7 @@ function activate(context) {
     ...WEBVIEW_COMMANDS.map((name) => vscode.commands.registerCommand('pptxViewer.' + name, () => provider.sendCommand(name))),
     vscode.commands.registerCommand('pptxViewer.openWith', async (uri) => {
       const target = uri instanceof vscode.Uri ? uri
-        : ((await vscode.window.showOpenDialog({ filters: { PowerPoint: ['pptx', 'ppsx', 'potx', 'pptm'] }, canSelectMany: false })) || [])[0];
+        : ((await vscode.window.showOpenDialog({ filters: { PowerPoint: ['pptx', 'ppsx', 'potx', 'pptm', 'ppt', 'pps', 'pot'] }, canSelectMany: false })) || [])[0];
       if (target) await vscode.commands.executeCommand('vscode.openWith', target, VIEW_TYPE);
     }),
   );
