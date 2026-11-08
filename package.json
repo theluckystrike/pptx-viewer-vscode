@@ -1,8 +1,8 @@
 {
   "name": "pptx-slide-viewer",
-  "displayName": "PPTX Viewer & PPT Viewer, PowerPoint Viewer & Slideshow",
-  "description": "PPTX viewer, PPT viewer and PowerPoint slide viewer for .pptx, .ppsx, .potx and old .ppt decks. Present full screen, thumbnails, notes, search, copy a slide as PNG or Markdown. Reloads when a script or AI agent saves the deck. Offline, no LibreOffice.",
-  "version": "0.4.0",
+  "displayName": "PPTX Viewer & PowerPoint Preview, PPT Presentation Slideshow",
+  "description": "Free, offline, no LibreOffice. Present with notes. PPTX viewer, PPT viewer and PowerPoint slide viewer for .pptx, .ppsx, .potx and old .ppt decks: full screen, thumbnails, search, copy a slide as PNG or Markdown. Reloads when a script or AI agent saves the deck.",
+  "version": "0.4.1",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",

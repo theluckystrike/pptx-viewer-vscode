@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1 (2026-11-08)
+
+- The Marketplace name is now "PPTX Viewer & PowerPoint Preview, PPT Presentation Slideshow" (was "PPTX Viewer & PPT Viewer, PowerPoint Viewer & Slideshow"), so more searches find it. The extension ID, settings and commands stay the same.
+- The short description now starts with what the name does not say: free, offline, no LibreOffice, and you can present with notes.
+- No change to how files open or look.
+
 ## 0.4.0 (2026-11-08)
 
 - Slides look closer to PowerPoint. Body text now takes its size, bullets and spacing from the slide master. Before, bullets in decks made with python-pptx and similar tools were drawn at 18 pt instead of 32 pt, without bullet marks and too low on the slide.

@@ -154,14 +154,15 @@ test('protocol: savePng takes only a real PNG of sane size for a real slide numb
   assert.equal(parseWebviewMessage({ type: 'pngFailed', message: 'x'.repeat(900) }).message.length, 300);
 });
 
-test('package.json: PNG commands, phrase-first name with the three search phrases, 0.4.0', () => {
+test('package.json: PNG commands, phrase-first name with every word of the search phrases, 0.4.1', () => {
   const pkg = require('../package.json');
   const ids = pkg.contributes.commands.map((c) => c.command);
   assert.ok(ids.includes('pptxViewer.copySlidePng') && ids.includes('pptxViewer.saveSlidePng'));
   assert.ok(pkg.displayName.startsWith('PPTX Viewer'));
-  for (const phrase of ['pptx viewer', 'ppt viewer', 'powerpoint viewer']) assert.ok(pkg.displayName.toLowerCase().includes(phrase), phrase);
+  const words = new Set(pkg.displayName.toLowerCase().split(/[^a-z0-9]+/));
+  for (const phrase of ['pptx viewer', 'ppt viewer', 'powerpoint viewer', 'powerpoint preview', 'ppt preview', 'presentation viewer']) assert.ok(phrase.split(' ').every((w) => words.has(w)), phrase);
   assert.ok(pkg.keywords.length <= 30 && new Set(pkg.keywords).size === pkg.keywords.length);
-  assert.equal(pkg.version, '0.4.0');
+  assert.equal(pkg.version, '0.4.1');
   const { WEBVIEW_COMMANDS } = (() => { const M = require('module'); const o = M._load; M._load = function (r, ...a) { return r === 'vscode' ? {} : o.call(this, r, ...a); }; try { return require('../src/extension'); } finally { M._load = o; } })();
   assert.ok(WEBVIEW_COMMANDS.includes('copySlidePng') && WEBVIEW_COMMANDS.includes('saveSlidePng'));
 });

@@ -1,4 +1,4 @@
-# PPTX Viewer & PPT Viewer, PowerPoint Viewer & Slideshow
+# PPTX Viewer & PowerPoint Preview, PPT Presentation Slideshow
 
 PPTX Viewer opens PowerPoint decks right in VS Code: `.pptx`, `.ppsx`, `.potx` and old `.ppt` files, with thumbnails, speaker notes, search and full screen Present. Check a deck that a script, python-pptx or an AI agent (Claude Code, Copilot, Cursor) just wrote: the slide reloads each time the file is saved. It reads files through VS Code, so it also works over Remote SSH, WSL, Dev Containers and Codespaces. No LibreOffice, no upload.
 
