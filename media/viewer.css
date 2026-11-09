@@ -13,6 +13,10 @@ input:focus, button:focus-visible, .thumb:focus-visible { outline: 1px solid var
 #slideInput { width: 44px; text-align: right; }
 #searchInput { flex: 0 1 220px; min-width: 110px; width: 220px; }
 .group { display: inline-flex; align-items: center; gap: 3px; }
+.group[hidden] { display: none; }
+.proBadge { font-size: 9px; font-weight: 600; line-height: 1; padding: 2px 3px; margin-left: 5px; border-radius: 3px; letter-spacing: .3px; vertical-align: 1px;
+  color: var(--vscode-badge-foreground, #fff); background: var(--vscode-badge-background, #4d4d4d); }
+.proBadge[hidden] { display: none; }
 select { font: inherit; color: var(--vscode-dropdown-foreground, var(--vscode-input-foreground, inherit)); background: var(--vscode-dropdown-background, var(--vscode-input-background, #fff)); border: 1px solid var(--vscode-dropdown-border, var(--vscode-input-border, #ccc)); border-radius: 3px; padding: 2px 4px; }
 select:focus { outline: 1px solid var(--vscode-focusBorder, #0078d4); outline-offset: -1px; }
 #zoomSelect { min-width: 96px; }

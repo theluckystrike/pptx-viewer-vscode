@@ -8,6 +8,8 @@ const { parseDeck, slideToMarkdown, deckToMarkdown } = require('./pptx');
 const { parsePpt, sniffPpt } = require('./ppt');
 const { createRatingPrompt } = require('./rate');
 const { registerSupport, commandUris, showLinks } = require('./support');
+const { createPro } = require('./pro');
+const { createExportTools } = require('./exportTools');
 
 let rating = { success() {}, failure() {} };
 
@@ -70,6 +72,19 @@ class PptxEditorProvider {
   constructor(context) {
     this.context = context;
     this.active = null;
+    this.entries = new Set();
+  }
+
+  /** What the webview shows of Zovo Pro: the Export button (show) and its PRO badge (badge). */
+  proState() {
+    const p = this.pro;
+    if (!p) return { show: false, badge: false };
+    return { show: p.shown(), badge: !p.isPro() };
+  }
+
+  postPro() {
+    const st = this.proState();
+    for (const e of this.entries) if (e.ready) e.panel.webview.postMessage({ type: 'pro', pro: st });
   }
 
   openCustomDocument(uri) { return new DeckDocument(uri); }
@@ -111,6 +126,7 @@ class PptxEditorProvider {
     const fileName = path.posix.basename(document.uri.path);
     const entry = { panel, uri: document.uri, deck: null, slide: 1, forceLoad: false, ready: false };
     if (panel.active) this.active = entry;
+    this.entries.add(entry);
     const disposables = [];
     const send = (m) => webview.postMessage(m);
     let disposed = false;
@@ -144,7 +160,7 @@ class PptxEditorProvider {
       if (!m) return;
       if (m.type === 'ready') {
         entry.ready = true;
-        send({ type: 'init', config: this.config(), fileName, prefs: this.getPrefs(document.uri) });
+        send({ type: 'init', config: this.config(), fileName, prefs: this.getPrefs(document.uri), pro: this.proState() });
         load();
       } else if (m.type === 'openInDefaultApp') {
         await vscode.env.openExternal(document.uri);
@@ -167,6 +183,10 @@ class PptxEditorProvider {
         vscode.window.setStatusBarMessage(`$(file-media) Slide ${m.slide} copied as a picture`, 3000);
       } else if (m.type === 'pngFailed') {
         vscode.window.showWarningMessage('PPTX Viewer: ' + m.message);
+      } else if (m.type === 'exportMenu') {
+        if (this.tools) { this.active = entry; this.tools.menu(); }
+      } else if (m.type === 'exportSlide' || m.type === 'exportDone') {
+        if (this.tools) this.tools.onMessage(entry, m);
       } else if (m.type === 'rendered') {
         entry.rendered = m;
         if (entry.waitRender && !entry.counted) { entry.counted = true; rating.success(); }
@@ -192,6 +212,8 @@ class PptxEditorProvider {
     }));
     panel.onDidDispose(() => {
       disposed = true;
+      this.entries.delete(entry);
+      if (this.tools) this.tools.onPanelClosed(entry);
       if (entry.zen) { entry.zen = false; vscode.commands.executeCommand('workbench.action.toggleZenMode').then(undefined, () => {}); }
       clearTimeout(timer);
       if (this.active === entry) this.active = null;
@@ -239,6 +261,20 @@ function activate(context) {
   rating = createRatingPrompt({ vscode, context, extensionId: 'zovo.pptx-slide-viewer', section: 'pptxViewer', name: 'PPTX Viewer' });
   registerSupport({ vscode, context, prefix: 'pptxViewer', selfId: 'zovo.pptx-slide-viewer' });
   const provider = new PptxEditorProvider(context);
+  // Zovo Pro (src/pro.js): all slides as PNG, the deck as PDF, decks in a folder to Markdown. Local checks only.
+  const pro = createPro({ vscode, context });
+  provider.pro = pro;
+  provider.tools = createExportTools({ vscode, provider, pro, readDeck });
+  pro.ready.then(() => provider.postPro(), () => {});
+  context.subscriptions.push(pro.onDidChange(() => provider.postPro()));
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((e) => { if (e.affectsConfiguration('pptxViewer.showProFeatures')) provider.postPro(); }));
+  if (vscode.window.registerUriHandler) context.subscriptions.push(vscode.window.registerUriHandler({ handleUri: (uri) => pro.license.handleUri(uri) }));
+  context.subscriptions.push(
+    vscode.commands.registerCommand('pptxViewer.exportMenu', () => provider.tools.menu()),
+    vscode.commands.registerCommand('pptxViewer.exportSlidesPng', () => provider.tools.exportPngs()),
+    vscode.commands.registerCommand('pptxViewer.exportPdf', () => provider.tools.exportPdf()),
+    vscode.commands.registerCommand('pptxViewer.decksToMarkdown', (uri) => provider.tools.markdownBatch(uri instanceof vscode.Uri ? uri : undefined)),
+  );
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(VIEW_TYPE, provider, {
       webviewOptions: { retainContextWhenHidden: true },
@@ -253,7 +289,7 @@ function activate(context) {
       if (target) await vscode.commands.executeCommand('vscode.openWith', target, VIEW_TYPE);
     }),
   );
-  return { provider };
+  return { provider, pro };
 }
 
 function deactivate() {}

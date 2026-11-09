@@ -59,6 +59,23 @@ function parseWebviewMessage(raw) {
       const slide = int(raw.slide, 1, MAX_SLIDE);
       return slide ? { type: raw.type, slide } : null;
     }
+    case 'exportMenu':
+      return { type: raw.type };
+    case 'exportSlide': {
+      // One slide picture for a Zovo Pro export (PNG or JPEG; the host checks which one it asked for).
+      const id = int(raw.id, 1, 1e9);
+      const slide = int(raw.slide, 1, MAX_SLIDE);
+      const data = raw.data instanceof Uint8Array ? raw.data : raw.data instanceof ArrayBuffer ? new Uint8Array(raw.data) : null;
+      return id && slide && data && data.length > 8 && data.length <= MAX_PNG_BYTES ? { type: raw.type, id, slide, data } : null;
+    }
+    case 'exportDone': {
+      const id = int(raw.id, 1, 1e9);
+      if (!id) return null;
+      const failed = Array.isArray(raw.failed) ? raw.failed.filter((n) => int(n, 1, MAX_SLIDE)).slice(0, 1000) : [];
+      const out = { type: raw.type, id, failed, cancelled: raw.cancelled === true };
+      if (typeof raw.error === 'string') out.error = raw.error.slice(0, 300);
+      return out;
+    }
     case 'pngFailed':
       return { type: raw.type, message: typeof raw.message === 'string' ? raw.message.slice(0, 300) : 'Unknown error' };
     case 'error':

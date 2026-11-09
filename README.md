@@ -16,6 +16,7 @@ PPTX Viewer opens PowerPoint decks right in VS Code: `.pptx`, `.ppsx`, `.potx` a
 - See each slide with thumbnails and its speaker notes. Zoom in on small print, or scroll through the whole deck like a document.
 - Search titles, bullets, table cells and notes across the whole deck, then jump to the slide.
 - Copy one slide or the whole deck as clean Markdown for a README, an issue or a chat with an AI assistant.
+- Optional Zovo Pro (USD 19 once, for every Zovo viewer): export all slides as PNG files or the deck as one PDF, and convert a folder of decks to Markdown with speaker notes. Each one works 3 times for free. Everything above stays free.
 
 ## Quick start
 
@@ -99,25 +100,36 @@ Video, audio, ink, embedded objects and SmartArt saved without that copy are not
 | `pptxViewer.defaultView` | `slide` | How a deck opens the first time. `slide` shows one slide at a time and `scroll` puts all slides in one column |
 | `pptxViewer.defaultZoom` | `fit` | Zoom a deck opens with the first time, `fit` or `width` |
 | `pptxViewer.presentFullScreen` | `true` | Present switches VS Code to Zen Mode (full screen) and back on Esc. `false` presents inside the editor tab |
+| `pptxViewer.showProFeatures` | `true` | Show the Zovo Pro Export button and commands. `false` hides them; everything free stays |
 | `pptxViewer.askForRating` | `true` | Ask for a rating after 2 files opened without an error in 2 sessions at least 4 hours apart. "Rate it" opens the Marketplace review page in VS Code and the Open VSX one in Cursor, Windsurf and VSCodium. "Later" asks one more time after 7 days, "No thanks" never again. It never asks after an error. Turn it off with `false`. |
 
 ## Large decks
 
 The extension reads the text of the deck first and skips images and video while it does, so the outline, notes and search are ready before any slide is drawn. Slides are then drawn one at a time, when you first look at them, and thumbnails only as you scroll to them. In a real VS Code window on a MacBook, a public 197 MB, 42-slide USGS deck showed its outline in under a second and its first slide in about 5 seconds, and a 33 MB, 37-slide deck in about 2 seconds. Above 300 MB the viewer asks before it opens the file.
 
+## Export slides and decks (Zovo Pro)
+
+Click Export in the toolbar, or run "PPTX: Export (Pro)..." from the Command Palette or the `...` menu of the deck tab.
+
+- Export all slides as PNG: every slide as a picture about 1920 pixels wide, in a folder you pick, named `deck-slide-01.png` and so on so they sort in slide order. It asks before it replaces a file.
+- Export the deck as PDF: one PDF page per slide, at the slide size, for someone who has no PowerPoint. The pages are pictures of the slides, so the text in the PDF can't be selected or searched.
+- Convert decks in a folder to Markdown: every `.pptx`, `.ppsx`, `.potx`, `.pptm` and `.ppt` deck in a folder and its subfolders, with titles, bullet levels, tables and speaker notes. One `.md` file next to each deck, or one file for all of them. Right-click a folder in the Explorer and pick "Convert Decks in a Folder to Markdown with Notes (Pro)". Decks it can't read are listed, and the rest are still converted.
+
+The pictures are drawn by the same code that shows the slides, on your computer. No LibreOffice, no PowerPoint, no upload.
+
 ## Free and Zovo Pro
 
-This viewer is free and complete. Nothing in it is paid, and every feature it has today stays free.
+Everything you could do before stays free: viewing, Present, speaker notes, search, thumbnails and the outline, copying or saving one slide as PNG, and Copy as Markdown for a slide or the whole deck.
 
-Zovo Pro is optional: USD 19, paid once, for every Zovo VS Code viewer. Today it adds Pro features in [Hex Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-hex-viewer) (binary templates with a structure view, bookmarks, checksums and compare reports) and [DOCX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode) (redline export as a Word file with tracked changes, and folder compare). Pro features that come to other Zovo viewers later are included, this one too if it gets any. See [what Zovo Pro includes](https://theluckystrike.github.io/zovo-plugin-factory/pro.html).
+Zovo Pro adds the three exports above. Each one works 3 times on your computer before it asks. Zovo Pro is USD 19 once on GitHub Sponsors (the ["$19 one time" tier](https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878)) and unlocks the Pro features in every Zovo VS Code viewer, including [Hex Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-hex-viewer) and [DOCX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode). If you bought that tier, or have a monthly sponsorship of USD 10 or more that is still running, run "Zovo: Unlock Pro with GitHub Sponsors". The "$15 one time" and "$5 a month" tiers on the same page are for Obsidian plugins and do not include Zovo Pro. No GitHub account? Send USD 19 to [paypal.com/paypalme/najzzz/19](https://www.paypal.com/paypalme/najzzz/19) with "Zovo Pro" in the note, and you get a license key by email within a day; run "Zovo: Enter License Key". No popups on open, no ads, no countdown. Set `pptxViewer.showProFeatures` to `false` to hide the Export button and the Pro commands. See [what Zovo Pro includes](https://theluckystrike.github.io/zovo-plugin-factory/pro.html).
 
 ## Privacy and security
 
-Everything runs on your machine. The extension makes no network calls and has no telemetry. The viewer runs under a strict Content-Security-Policy that allows only the extension's own scripts and blocks all network access. Text from the deck is inserted as plain text, never as HTML. Macros in `.pptm` files are never run, and links inside slides do nothing when clicked.
+Everything runs on your machine. The extension makes no network calls and has no telemetry. The one exception is a click on "Unlock with GitHub Sponsors" (Zovo Pro): VS Code's GitHub sign-in and one question to GitHub about your sponsorship. A license key is checked offline. The viewer runs under a strict Content-Security-Policy that allows only the extension's own scripts and blocks all network access. Text from the deck is inserted as plain text, never as HTML. Macros in `.pptm` files are never run, and links inside slides do nothing when clicked.
 
 ## Known limits
 
-- It is a viewer. It doesn't edit or export to PDF (a single slide can be saved as PNG). Present mode has no presenter view or timer.
+- It is a viewer. It doesn't edit slides. A single slide can be saved as PNG; all slides as PNG or PDF are Zovo Pro. Present mode has no presenter view or timer.
 - Old binary `.ppt` files (PowerPoint 97 to 2003) show text only: no pictures, shapes, tables or layout. Bullet levels show flat.
 - Fonts that are not installed on your machine are replaced by a close match (Carlito for Calibri, Caladea for Cambria, then a common sans or serif font), so line breaks can differ a little from PowerPoint.
 - Table styles from the theme are not always drawn. The table text is always correct.

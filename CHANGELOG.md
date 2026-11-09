@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0 (2026-11-09)
+
+- New, optional Zovo Pro exports: all slides as PNG files, the deck as one PDF, and every deck in a folder to Markdown with speaker notes (one file per deck or one for all). Each works 3 times on your computer for free. Zovo Pro is USD 19 once and covers every Zovo viewer.
+- An Export button in the toolbar and "Convert Decks in a Folder to Markdown with Notes (Pro)" on folders in the Explorer. `pptxViewer.showProFeatures` set to `false` hides them.
+- Nothing that was free changed: viewing, Present, notes, search, one slide as PNG and Copy as Markdown work as before. No popup on open.
+
 ## 0.4.4 (2026-11-09)
 
 - The rating question comes after 2 files that opened without an error in 2 sessions at least 4 hours apart (was 3 files on 2 calendar days). It still never shows after an error, at most twice in all, and the setting turns it off.

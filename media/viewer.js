@@ -49,6 +49,13 @@
       applyViewButtons();
       status('Reading ' + state.fileName + '…');
       applyNotes();
+      if (m.pro && typeof m.pro === 'object') applyPro(m.pro);
+    } else if (m.type === 'pro') {
+      if (m.pro && typeof m.pro === 'object') applyPro(m.pro);
+    } else if (m.type === 'exportSlides') {
+      exportSlides(m.id, m.format === 'jpeg' ? 'jpeg' : 'png');
+    } else if (m.type === 'exportCancel') {
+      if (exportJob && exportJob.id === m.id) exportJob.cancelled = true;
     } else if (m.type === 'config') {
       state.config = m.config || state.config;
     } else if (m.type === 'deck') {
@@ -571,6 +578,7 @@
   $('notesBtn').addEventListener('click', () => { state.notes = !state.notes; applyNotes(); });
   $('mdBtn').addEventListener('click', () => vscode.postMessage({ type: 'copySlideMarkdown', slide: state.current }));
   $('mdAllBtn').addEventListener('click', () => vscode.postMessage({ type: 'copyDeckMarkdown' }));
+  $('exportBtn').addEventListener('click', () => vscode.postMessage({ type: 'exportMenu' }));
   $('pngBtn').addEventListener('click', (e) => { if (e.shiftKey) savePng(); else copyPng(); });
   $('zoomInBtn').addEventListener('click', () => zoomStep(1));
   $('zoomOutBtn').addEventListener('click', () => zoomStep(-1));
@@ -596,7 +604,7 @@
   // ---- slide as PNG: the drawn slide, about 1920 px wide, on white ----
   // The slide's own nodes are put in an SVG foreignObject (pictures are already data: URLs, so
   // nothing is fetched) and drawn on a canvas. Chart canvases are swapped for pictures of themselves.
-  async function slidePng(n) {
+  async function slidePng(n, jpeg) {
     const deck = state.deck;
     const src = deck && drawnNode(n);
     if (!src) throw new Error(state.drawn ? 'This slide could not be drawn, so there is no picture of it. Copy as Markdown copies its text.' : 'Old .ppt files and text-only mode have no slide pictures. Copy as Markdown copies the text.');
@@ -628,9 +636,38 @@
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, w, h);
     ctx.drawImage(img, 0, 0);
-    const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+    const blob = await new Promise((res) => (jpeg ? canvas.toBlob(res, 'image/jpeg', 0.92) : canvas.toBlob(res, 'image/png')));
     if (!blob) throw new Error('The picture could not be made.');
     return blob;
+  }
+
+  // ---- Zovo Pro: every slide as a picture, one message per slide (the host writes PNG files or builds a PDF) ----
+  let exportJob = null;
+  function applyPro(p) {
+    $('exportGroup').hidden = p.show !== true;
+    $('exportBadge').hidden = p.badge !== true;
+  }
+  async function exportSlides(id, format) {
+    const total = state.renderer ? state.renderer.count : 0;
+    if (!state.deck || !total) { vscode.postMessage({ type: 'exportDone', id, error: 'This deck has no drawn slides to export.' }); return; }
+    if (exportJob) exportJob.cancelled = true;
+    const job = { id, cancelled: false };
+    exportJob = job;
+    const failed = [];
+    for (let n = 1; n <= total; n++) {
+      if (job.cancelled) break;
+      status('Exporting slide ' + n + ' of ' + total + '…');
+      try {
+        const blob = await slidePng(n, format === 'jpeg');
+        vscode.postMessage({ type: 'exportSlide', id, slide: n, data: new Uint8Array(await blob.arrayBuffer()) });
+      } catch (e) {
+        failed.push(n);
+      }
+      await new Promise((r) => setTimeout(r, 0)); // keep the page responsive between slides
+    }
+    if (exportJob === job) exportJob = null;
+    status('');
+    vscode.postMessage({ type: 'exportDone', id, failed, cancelled: job.cancelled });
   }
 
   function pngFailed(e) {

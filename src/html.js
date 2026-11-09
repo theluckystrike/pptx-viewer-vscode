@@ -79,6 +79,7 @@ ${footer ? `<style>${FOOTER_CSS}</style>` : ''}
   <button id="mdBtn" title="Copy this slide's text and notes as Markdown">Markdown</button>
   <button id="pngBtn" title="Copy this slide as a PNG picture. Shift+click saves it as a .png file.">PNG</button>
   <button id="mdAllBtn" title="Copy all slides as Markdown">All</button></span>
+  <span id="exportGroup" class="group" hidden><button id="exportBtn" title="Export all slides as PNG files or one PDF, or convert a folder of decks to Markdown (Zovo Pro)">Export<span class="proBadge" id="exportBadge">PRO</span></button></span>
 </div>
 <div id="main">
   <aside id="sidebar">
