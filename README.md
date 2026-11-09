@@ -105,13 +105,11 @@ Video, audio, ink, embedded objects and SmartArt saved without that copy are not
 
 The extension reads the text of the deck first and skips images and video while it does, so the outline, notes and search are ready before any slide is drawn. Slides are then drawn one at a time, when you first look at them, and thumbnails only as you scroll to them. In a real VS Code window on a MacBook, a public 197 MB, 42-slide USGS deck showed its outline in under a second and its first slide in about 5 seconds, and a 33 MB, 37-slide deck in about 2 seconds. Above 300 MB the viewer asks before it opens the file.
 
-
-
 ## Free and Zovo Pro
 
 This viewer is free and complete. Nothing in it is paid, and every feature it has today stays free.
 
-Zovo Pro is optional: USD 15, paid once, for every Zovo VS Code viewer. Today it adds Pro features in [Hex Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-hex-viewer) (binary templates with a structure view, bookmarks, checksums and compare reports) and [DOCX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode) (redline export as a Word file with tracked changes, and folder compare). Pro features that come to other Zovo viewers later are included, this one too if it gets any. See [what Zovo Pro includes](https://theluckystrike.github.io/zovo-plugin-factory/pro.html).
+Zovo Pro is optional: USD 19, paid once, for every Zovo VS Code viewer. Today it adds Pro features in [Hex Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-hex-viewer) (binary templates with a structure view, bookmarks, checksums and compare reports) and [DOCX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode) (redline export as a Word file with tracked changes, and folder compare). Pro features that come to other Zovo viewers later are included, this one too if it gets any. See [what Zovo Pro includes](https://theluckystrike.github.io/zovo-plugin-factory/pro.html).
 
 ## Privacy and security
 
