@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.2 (2026-11-09)
+
+- PayPal is now in the footer links and in the README "Support Zovo" section, next to GitHub Sponsors. Both are optional; the viewer works the same without them.
+- README: a short "Free and Zovo Pro" note. This viewer stays free and complete; nothing in it becomes paid.
+- No change to how files open or look.
+
 ## 0.4.1 (2026-11-08)
 
 - The Marketplace name is now "PPTX Viewer & PowerPoint Preview, PPT Presentation Slideshow" (was "PPTX Viewer & PPT Viewer, PowerPoint Viewer & Slideshow"), so more searches find it. The extension ID, settings and commands stay the same.
