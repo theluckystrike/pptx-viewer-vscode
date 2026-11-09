@@ -647,6 +647,11 @@
     $('exportGroup').hidden = p.show !== true;
     $('exportBadge').hidden = p.badge !== true;
   }
+  // A MessageChannel turn, not setTimeout: a webview whose window is in the background gets its timers slowed to
+  // one per second, which made a 120-slide export take two minutes.
+  function yieldNow() {
+    return new Promise((r) => { const ch = new MessageChannel(); ch.port1.onmessage = () => { ch.port1.close(); r(); }; ch.port2.postMessage(0); });
+  }
   async function exportSlides(id, format) {
     const total = state.renderer ? state.renderer.count : 0;
     if (!state.deck || !total) { vscode.postMessage({ type: 'exportDone', id, error: 'This deck has no drawn slides to export.' }); return; }
@@ -663,7 +668,7 @@
       } catch (e) {
         failed.push(n);
       }
-      await new Promise((r) => setTimeout(r, 0)); // keep the page responsive between slides
+      await yieldNow(); // keep the page responsive between slides
     }
     if (exportJob === job) exportJob = null;
     status('');
