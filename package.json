@@ -2,7 +2,7 @@
   "name": "pptx-slide-viewer",
   "displayName": "PPTX Viewer & PowerPoint Preview, PPT Presentation Slideshow",
   "description": "Free, offline, no LibreOffice. Present with notes. PPTX viewer, PPT viewer and PowerPoint slide viewer for .pptx, .ppsx, .potx and old .ppt decks: full screen, thumbnails, search, copy a slide as PNG or Markdown. Reloads when a script or AI agent saves the deck.",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -196,29 +196,29 @@
         "category": "PPTX"
       },
       {
-        "command": "pptxViewer.unlockWithSponsors",
-        "title": "Zovo: Unlock Pro with GitHub Sponsors",
-        "category": "PPTX"
-      },
-      {
         "command": "pptxViewer.getPro",
-        "title": "Zovo: Get Pro (USD 19 once, all Zovo viewers)",
-        "category": "PPTX"
+        "title": "Get Zovo Pro (USD 19 once, all 21 Zovo extensions)",
+        "category": "Zovo Pro"
       },
       {
         "command": "pptxViewer.payWithPayPal",
-        "title": "Zovo: Pay for Pro with PayPal (USD 19, key by email)",
-        "category": "PPTX"
+        "title": "Pay for Zovo Pro with PayPal (USD 19, team of 5 USD 59)",
+        "category": "Zovo Pro"
+      },
+      {
+        "command": "pptxViewer.unlockWithSponsors",
+        "title": "I already paid: unlock with GitHub Sponsors",
+        "category": "Zovo Pro"
       },
       {
         "command": "pptxViewer.enterLicenseKey",
-        "title": "Zovo: Enter License Key",
-        "category": "PPTX"
+        "title": "Enter Zovo Pro license key",
+        "category": "Zovo Pro"
       },
       {
         "command": "pptxViewer.removeLicense",
-        "title": "Zovo: Remove License from This Editor",
-        "category": "PPTX"
+        "title": "Remove Zovo Pro from this editor",
+        "category": "Zovo Pro"
       }
     ],
     "menus": {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1 (2026-11-10)
+
+- The Zovo Pro commands share one "Zovo Pro" group in the Command Palette, with the same names in every Zovo extension: "Get Zovo Pro (USD 19 once, all 21 Zovo extensions)", "Pay for Zovo Pro with PayPal", "I already paid: unlock with GitHub Sponsors", "Enter Zovo Pro license key" and "Remove Zovo Pro from this editor".
+- The Pro window lists the ways to pay in one order, GitHub Sponsors first (shared license module synced).
+- Nothing else changed: viewing, Present, notes, search, one slide as PNG, Copy as Markdown and the 3 free tries of each Pro export work as before. No popup on open.
+
 ## 0.5.0 (2026-11-09)
 
 - New, optional Zovo Pro exports: all slides as PNG files, the deck as one PDF, and every deck in a folder to Markdown with speaker notes (one file per deck or one for all). Each works 3 times on your computer for free. Zovo Pro is USD 19 once and covers every Zovo viewer.
