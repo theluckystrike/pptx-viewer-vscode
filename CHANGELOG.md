@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.3 (2026-11-09)
+
+- The rating question comes after 2 files that opened without an error in 2 sessions at least 4 hours apart (was 3 files on 2 calendar days). It still never shows after an error, at most twice in all, and the setting turns it off.
+- The viewer footer now starts with Rate, then More free viewers, Sponsor and Hide.
+- "Rate it" in the rating question and the Rate link in the viewer footer now open the review page of the store your editor installs from: the Visual Studio Marketplace in VS Code, Open VSX in Cursor, Windsurf, VSCodium and other editors that use Open VSX. Before, they always opened the Marketplace.
+- A window that stays open for days now counts a file opened 4 hours or more after its first one as a new session for the rating question.
+- Nothing else changed: files open and look the same.
+
 ## 0.4.1 (2026-11-08)
 
 - The Marketplace name is now "PPTX Viewer & PowerPoint Preview, PPT Presentation Slideshow" (was "PPTX Viewer & PPT Viewer, PowerPoint Viewer & Slideshow"), so more searches find it. The extension ID, settings and commands stay the same.

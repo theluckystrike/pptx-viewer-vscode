@@ -2,7 +2,7 @@
   "name": "pptx-slide-viewer",
   "displayName": "PPTX Viewer & PowerPoint Preview, PPT Presentation Slideshow",
   "description": "Free, offline, no LibreOffice. Present with notes. PPTX viewer, PPT viewer and PowerPoint slide viewer for .pptx, .ppsx, .potx and old .ppt decks: full screen, thumbnails, search, copy a slide as PNG or Markdown. Reloads when a script or AI agent saves the deck.",
-  "version": "0.4.1",
+  "version": "0.4.3",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -325,7 +325,7 @@
         "pptxViewer.askForRating": {
           "type": "boolean",
           "default": true,
-          "description": "Ask for a Marketplace rating after 3 files opened without an error on 2 different days. \"Later\" asks one more time after 7 days, \"No thanks\" never asks again. It never asks after an error or more than 2 times. Nothing is sent anywhere."
+          "description": "Ask for a rating after 2 files opened without an error in 2 sessions at least 4 hours apart. \"Rate it\" opens the Marketplace review page in VS Code and the Open VSX one in Cursor, Windsurf and VSCodium. \"Later\" asks one more time after 7 days, \"No thanks\" never asks again. It never asks after an error or more than 2 times. Nothing is sent anywhere."
         },
         "pptxViewer.showSupportLinks": {
           "type": "boolean",
