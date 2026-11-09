@@ -360,7 +360,7 @@ test('activate: no message and no network at start; every Pro command is registe
     const api = require('../src/extension').activate(f.context);
     await api.pro.ready;
     await new Promise((r) => setTimeout(r, 20));
-    for (const id of ['pptxViewer.exportMenu', 'pptxViewer.exportSlidesPng', 'pptxViewer.exportPdf', 'pptxViewer.decksToMarkdown', 'pptxViewer.getPro', 'pptxViewer.unlockWithSponsors', 'pptxViewer.enterLicenseKey', 'pptxViewer.removeLicense']) assert.ok(registered.includes(id), id);
+    for (const id of ['pptxViewer.exportMenu', 'pptxViewer.exportSlidesPng', 'pptxViewer.exportPdf', 'pptxViewer.decksToMarkdown', 'pptxViewer.getPro', 'pptxViewer.payWithPayPal', 'pptxViewer.unlockWithSponsors', 'pptxViewer.enterLicenseKey', 'pptxViewer.removeLicense']) assert.ok(registered.includes(id), id);
     const declared = require('../package.json').contributes.commands.map((c) => c.command);
     for (const id of registered) assert.ok(declared.includes(id), 'declared: ' + id);
     assert.equal(f.log.info.length + f.log.warn.length + f.log.modal.length, 0);
@@ -376,7 +376,7 @@ test('package.json: Pro commands hide with the setting; free commands keep their
   const pkg = require('../package.json');
   const pal = pkg.contributes.menus.commandPalette;
   for (const id of ['pptxViewer.exportMenu', 'pptxViewer.exportPdf', 'pptxViewer.decksToMarkdown', 'pptxViewer.getPro']) assert.match(pal.find((m) => m.command === id).when, /config\.pptxViewer\.showProFeatures/, id);
-  for (const m of pal) if (!/export|decksToMarkdown|Pro|License|Sponsors/.test(m.command)) assert.doesNotMatch(m.when || '', /showProFeatures/, m.command);
+  for (const m of pal) if (!/export|decksToMarkdown|Pro|License|Sponsors|PayPal/.test(m.command)) assert.doesNotMatch(m.when || '', /showProFeatures/, m.command);
   assert.equal(pkg.contributes.configuration.properties['pptxViewer.showProFeatures'].default, true);
   assert.ok(pkg.contributes.menus['explorer/context'].some((m) => m.command === 'pptxViewer.decksToMarkdown' && /explorerResourceIsFolder/.test(m.when)));
 });

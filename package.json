@@ -206,6 +206,11 @@
         "category": "PPTX"
       },
       {
+        "command": "pptxViewer.payWithPayPal",
+        "title": "Zovo: Pay for Pro with PayPal (USD 19, key by email)",
+        "category": "PPTX"
+      },
+      {
         "command": "pptxViewer.enterLicenseKey",
         "title": "Zovo: Enter License Key",
         "category": "PPTX"
@@ -329,6 +334,10 @@
         },
         {
           "command": "pptxViewer.removeLicense",
+          "when": "config.pptxViewer.showProFeatures"
+        },
+        {
+          "command": "pptxViewer.payWithPayPal",
           "when": "config.pptxViewer.showProFeatures"
         }
       ]
