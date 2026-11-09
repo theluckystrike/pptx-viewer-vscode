@@ -1,11 +1,13 @@
 # Changelog
 
-## 0.4.3 (2026-11-09)
+## 0.4.4 (2026-11-09)
 
 - The rating question comes after 2 files that opened without an error in 2 sessions at least 4 hours apart (was 3 files on 2 calendar days). It still never shows after an error, at most twice in all, and the setting turns it off.
-- The viewer footer now starts with Rate, then More free viewers, Sponsor and Hide.
+- The viewer footer now starts with Rate, then More free viewers, Sponsor, PayPal and Hide.
 - "Rate it" in the rating question and the Rate link in the viewer footer now open the review page of the store your editor installs from: the Visual Studio Marketplace in VS Code, Open VSX in Cursor, Windsurf, VSCodium and other editors that use Open VSX. Before, they always opened the Marketplace.
 - A window that stays open for days now counts a file opened 4 hours or more after its first one as a new session for the rating question.
+- PayPal is now in the footer links and in the README "Support Zovo" section, next to GitHub Sponsors. Both are optional; the viewer works the same without them.
+- README: a short "Free and Zovo Pro" note. This viewer stays free and complete; nothing in it becomes paid.
 - Nothing else changed: files open and look the same.
 
 ## 0.4.1 (2026-11-08)

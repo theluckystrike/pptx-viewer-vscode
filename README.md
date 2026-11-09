@@ -105,6 +105,12 @@ Video, audio, ink, embedded objects and SmartArt saved without that copy are not
 
 The extension reads the text of the deck first and skips images and video while it does, so the outline, notes and search are ready before any slide is drawn. Slides are then drawn one at a time, when you first look at them, and thumbnails only as you scroll to them. In a real VS Code window on a MacBook, a public 197 MB, 42-slide USGS deck showed its outline in under a second and its first slide in about 5 seconds, and a 33 MB, 37-slide deck in about 2 seconds. Above 300 MB the viewer asks before it opens the file.
 
+## Free and Zovo Pro
+
+This viewer is free and complete. Nothing in it is paid, and every feature it has today stays free.
+
+Zovo Pro is optional: USD 19, paid once, for every Zovo VS Code viewer. Today it adds Pro features in [Hex Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-hex-viewer) (binary templates with a structure view, bookmarks, checksums and compare reports) and [DOCX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode) (redline export as a Word file with tracked changes, and folder compare). Pro features that come to other Zovo viewers later are included, this one too if it gets any. See [what Zovo Pro includes](https://theluckystrike.github.io/zovo-plugin-factory/pro.html).
+
 ## Privacy and security
 
 Everything runs on your machine. The extension makes no network calls and has no telemetry. The viewer runs under a strict Content-Security-Policy that allows only the extension's own scripts and blocks all network access. Text from the deck is inserted as plain text, never as HTML. Macros in `.pptm` files are never run, and links inside slides do nothing when clicked.
@@ -127,14 +133,15 @@ Slides are drawn by [pptx-preview](https://www.npmjs.com/package/pptx-preview) (
 Zovo extensions are free, with no ads and no tracking. They are made by [theluckystrike](https://github.com/theluckystrike) on GitHub. If this one saves you time, you can support the work:
 
 - [Sponsor on GitHub](https://github.com/sponsors/theluckystrike)
+- [PayPal](https://www.paypal.com/paypalme/najzzz)
 - [Follow theluckystrike on GitHub](https://github.com/theluckystrike)
 
 ## More tools by Zovo
 
-- [DOCX Viewer, Word Viewer & DOCX Preview (Dark Mode)](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode) previews Word and ODT files with dark mode, an outline and search.
-- [PDF Viewer & PDF Reader](https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark) reads PDFs with a real dark mode, search, an outline and thumbnails.
-- [XLSX Viewer, Excel Viewer, CSV Viewer & Parquet Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.table-viewer-vscode) opens CSV, TSV, Excel and Parquet files as a sortable, filterable table.
+- [Office Viewer Pack](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-file-viewers): adds the other three Office viewers in one install.
+- [DOCX Viewer & ODT Viewer, Word Document Preview (Dark Mode)](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode) previews Word and ODT files with dark mode, an outline and search.
+- [PDF Viewer & Reader to Read and View PDF in Dark Mode](https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark) reads PDFs with a real dark mode, search, an outline and thumbnails.
+- [XLSX Viewer & CSV Preview for Excel, XLS & Parquet](https://marketplace.visualstudio.com/items?itemName=zovo.table-viewer-vscode) opens CSV, TSV, Excel and Parquet files as a sortable, filterable table.
 - [Graphviz Viewer & DOT Viewer (Live Preview)](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-graphviz-preview) shows a live preview of DOT files and exports SVG or PNG.
-- [EML Viewer, Email Headers & MBOX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.eml-viewer) reads EML, EMLX and MBOX email files with remote images blocked.
 
 See [all Zovo extensions on the Marketplace](https://marketplace.visualstudio.com/publishers/zovo).
