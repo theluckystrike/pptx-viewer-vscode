@@ -5,8 +5,9 @@
 - "More free viewers" now starts with the Zovo extensions most related to this one. Picking one opens its Marketplace page, where you choose to install it.
 - The walkthrough ends with a step that links free Zovo extensions for the files that often come with this one. A link opens the extension page; nothing installs on its own.
 - The footer link "Zovo Pro, USD 19" and the Marketplace Sponsor button open the Zovo Pro tier (USD 19 once, for every Zovo extension) instead of the general GitHub Sponsors page.
-- The Zovo Pro commands share one "Zovo Pro" group in the Command Palette, with the same names in every Zovo extension: "Get Zovo Pro (USD 19 once, all 21 Zovo extensions)", "Pay for Zovo Pro with PayPal", "I already paid: unlock with GitHub Sponsors", "Enter Zovo Pro license key" and "Remove Zovo Pro from this editor".
-- The Pro window lists the ways to pay in one order, GitHub Sponsors first (shared license module synced).
+- The Zovo Pro commands share one "Zovo Pro" group in the Command Palette, with the same names in every Zovo extension: "Get Zovo Pro (USD 19 once, all 22 Zovo extensions)", "Pay for Zovo Pro with PayPal", "I already paid: unlock with GitHub Sponsors", "Enter Zovo Pro license key" and "Remove Zovo Pro from this editor".
+- The Zovo Pro window is shorter and has 4 buttons: "Get Zovo Pro, USD 19", "Pay with PayPal", "I already paid" (unlock with GitHub Sponsors or a license key) and Cancel. It names the other PPTX Pro exports and says that Pro covers all 22 Zovo extensions.
+- One unlock for all Zovo extensions on this computer: after you unlock Zovo Pro here, the other Zovo extensions that have this license update find it without a second sign-in or key. The file `~/.zovo/pro.json` holds the key or the GitHub Sponsors result, never a sign-in token.
 - Nothing else changed: viewing, Present, notes, search, one slide as PNG, Copy as Markdown and the 3 free tries of each Pro export work as before. No popup on open.
 
 ## 0.5.0 (2026-11-09)

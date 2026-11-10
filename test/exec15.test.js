@@ -9,7 +9,7 @@ test('EXEC15: the 5 Zovo Pro commands share the "Zovo Pro" category, with the sa
   const pk = require('../package.json');
   const zovo = pk.contributes.commands.filter((c) => c.category === 'Zovo Pro');
   assert.deepEqual(zovo.map((c) => [c.command, c.title]), [
-    ['pptxViewer.getPro', 'Get Zovo Pro (USD 19 once, all 21 Zovo extensions)'],
+    ['pptxViewer.getPro', 'Get Zovo Pro (USD 19 once, all 22 Zovo extensions)'],
     ['pptxViewer.payWithPayPal', 'Pay for Zovo Pro with PayPal (USD 19, team of 5 USD 59)'],
     ['pptxViewer.unlockWithSponsors', 'I already paid: unlock with GitHub Sponsors'],
     ['pptxViewer.enterLicenseKey', 'Enter Zovo Pro license key'],
@@ -20,7 +20,7 @@ test('EXEC15: the 5 Zovo Pro commands share the "Zovo Pro" category, with the sa
   assert.equal(pk.engines.vscode, '^1.90.0');
 });
 
-test('EXEC15: the Pro window puts GitHub Sponsors first and only shows after the 3 free tries were used', async () => {
+test('EXEC15: the Pro window (module v2) has 4 buttons, Get Zovo Pro first, and only shows after the 3 free tries were used', async () => {
   const modal = [];
   const store = new Map();
   const vscode = {
@@ -43,7 +43,10 @@ test('EXEC15: the Pro window puts GitHub Sponsors first and only shows after the
   assert.equal(modal.length, 0, 'no Pro window while tries are left');
   assert.equal(await pro.check('pdf'), false);
   assert.equal(modal.length, 1);
-  assert.equal(modal[0].b[0], 'Get Zovo Pro');
-  assert.ok(modal[0].b.indexOf('Unlock with GitHub Sponsors') < modal[0].b.indexOf('Pay with PayPal'), 'Sponsors before PayPal');
+  assert.deepEqual(modal[0].b, ['Get Zovo Pro, USD 19', 'Pay with PayPal', 'I already paid']);
+  assert.match(modal[0].msg, /^Export the deck as PDF is part of Zovo Pro\./);
+  assert.match(modal[0].detail, /It turns on Export all slides as PNG and Decks in a folder to Markdown here, and the Pro tools of all 22 Zovo extensions/);
+  assert.match(modal[0].detail, /Everything that is free today stays free\./);
+  assert.doesNotMatch(modal[0].detail, /refund/i);
   assert.match(modal[0].detail, /USD 19/);
 });

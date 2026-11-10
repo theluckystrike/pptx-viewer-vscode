@@ -262,9 +262,9 @@ test('host: after 3 tries the 4th explains Pro once and asks for nothing else', 
   await t.tools.exportPdf();
   assert.equal(t.lic.calls.requirePro.length, 1);
   assert.equal(t.lic.calls.requirePro[0].f, 'Export the deck as PDF');
-  assert.match(t.lic.calls.requirePro[0].detail, /used the 3 free tries/);
-  assert.match(t.lic.calls.requirePro[0].detail, /USD 19 once/);
-  assert.match(t.lic.calls.requirePro[0].detail, /stays free/);
+  // Module v2 (EXEC14): the product passes the detail and the tries used; the module writes the price and the rest.
+  assert.equal(t.lic.calls.requirePro[0].detail.triesUsed, 3);
+  assert.match(t.lic.calls.requirePro[0].detail.detail, /one PDF/);
   assert.equal(t.log.saves.length, saves);
 });
 
