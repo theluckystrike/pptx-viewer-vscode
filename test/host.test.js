@@ -135,8 +135,8 @@ test('renderSlides off sends text only; a broken file sends an error', async () 
 test('support: package.json has the sponsor field, the two commands and the setting', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
   const support = require('../src/support');
-  assert.equal(pkg.sponsor.url, 'https://github.com/sponsors/theluckystrike');
-  assert.equal(pkg.sponsor.url, support.sponsorUrl());
+  assert.equal(pkg.sponsor.url, 'https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878');
+  assert.equal(pkg.sponsor.url, 'https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878');
   const ids = pkg.contributes.commands.map((c) => c.command);
   assert.ok(ids.includes('pptxViewer.supportDeveloper') && ids.includes('pptxViewer.moreViewers'));
   const cfg = Array.isArray(pkg.contributes.configuration) ? pkg.contributes.configuration : [pkg.contributes.configuration];
@@ -156,7 +156,7 @@ test('support: the footer shows by default and pptxViewer.showSupportLinks=false
       const html = p.panel.webview.html;
       assert.equal(/id="zovo-support"/.test(html), shown, String(value));
       assert.equal(html.includes('command:pptxViewer.moreViewers'), shown);
-      assert.deepEqual(p.panel.webview.options.enableCommandUris, ['pptxViewer.supportDeveloper', 'pptxViewer.moreViewers', 'workbench.action.openSettings']);
+      assert.deepEqual(p.panel.webview.options.enableCommandUris, ['pptxViewer.supportDeveloper', 'pptxViewer.moreViewers', 'pptxViewer.getPro', 'pptxViewer.payWithPayPal', 'workbench.action.openSettings']);
     } finally { delete settings.showSupportLinks; }
   }
 });

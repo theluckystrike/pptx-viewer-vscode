@@ -474,6 +474,14 @@
             "completionEvents": [
               "onCommand:pptxViewer.copySlideMarkdown"
             ]
+          },
+          {
+            "id": "zovo-related",
+            "title": "Files that often come with PowerPoint decks",
+            "description": "If your project also has Word documents or spreadsheets and CSV files, these free Zovo extensions open them. A link opens the extension page, and you choose there whether to install it.\n[Office Viewer Pack](command:extension.open?%5B%22zovo.zovo-file-viewers%22%5D)\n[DOCX Viewer](command:extension.open?%5B%22zovo.docx-viewer-vscode%22%5D)\n[XLSX and CSV Viewer](command:extension.open?%5B%22zovo.table-viewer-vscode%22%5D)",
+            "media": {
+              "markdown": "walkthrough/related.md"
+            }
           }
         ]
       }
@@ -501,6 +509,6 @@
     "esbuild": "0.24.2"
   },
   "sponsor": {
-    "url": "https://github.com/sponsors/theluckystrike"
+    "url": "https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878"
   }
 }
