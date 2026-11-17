@@ -17,6 +17,13 @@ PPTX Viewer opens PowerPoint decks right in VS Code: `.pptx`, `.ppsx`, `.potx` a
 - Search titles, bullets, table cells and notes across the whole deck, then jump to the slide.
 - Copy one slide or the whole deck as clean Markdown for a README, an issue or a chat with an AI assistant.
 
+## Teams and companies
+
+- Zovo Pro Team is the company licence: USD 59 once for a team of 5, one key, the Pro tools in every Zovo extension that has them. [See Zovo Pro Team](https://license.zovo.one/buy/zovo-pro-team?client_reference_id=readme-pptx)
+- Commercial use is allowed.
+- The key is checked on your computer, so it works offline. No account and no subscription.
+- Invoice with your company name and tax ID on request: support@zovo.one.
+
 ## Quick start
 
 1. Install the extension.
